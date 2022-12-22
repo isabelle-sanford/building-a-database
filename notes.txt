@@ -32,3 +32,8 @@ SO on reading and writing bytes -
 I could use a Reader for reading and a Writer for writing but that's creating a reading/writing object each time when I'd rather just have a wrapper for the bytes overall (like java bytebuffer) or access directly via slices (which ... should work?)
 Question with slices is how to convert from some bytes to an int ? is there a parseInt for bytes? 
 ok yes but I'm still making a reader each time... is that ok? 
+
+something something changing stuff inside functions 
+how do I make it so that the write actually sticks? 
+
+APPARENTLY I just needed to give it *Page instead of Page >:( but hey it works now!!
