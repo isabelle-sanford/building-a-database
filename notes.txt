@@ -1,0 +1,34 @@
+
+Questions / thoughts: 
+Do I need to care about pointers? 
+How do the driver / sql packages interact with what I need to do? Do I need to implement the functions in driver? 
+
+
+
+
+Package stuff
+- sync will be useful for concurrency
+
+Useful tutorial stuff:
+https://go.dev/doc/effective_go
+https://pkg.go.dev/std standard library
+https://go.dev/ref/spec language spec
+https://go.dev/doc/tutorial/call-module-code modules / tutorial
+
+Package driver defines interfaces for drivers to implement - probably what I want / equivalent of JDBC? 
+https://pkg.go.dev/database/sql/driver@go1.19.4
+https://github.com/golang/go/wiki/SQLDrivers
+https://pkg.go.dev/database/sql@go1.19.4
+https://pkg.go.dev/database/sql@go1.19.4
+https://github.com/golang/go/wiki/SQLInterface
+
+for now going for just the block / page things, figure out how to wrap into JDBC-equivalent later 
+
+probs do NOT want syscall bc it's system-specific stuff - os is better
+
+might use unsafe? 
+
+SO on reading and writing bytes - 
+I could use a Reader for reading and a Writer for writing but that's creating a reading/writing object each time when I'd rather just have a wrapper for the bytes overall (like java bytebuffer) or access directly via slices (which ... should work?)
+Question with slices is how to convert from some bytes to an int ? is there a parseInt for bytes? 
+ok yes but I'm still making a reader each time... is that ok? 
