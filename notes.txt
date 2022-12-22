@@ -1,6 +1,6 @@
 
 Questions / thoughts: 
-Do I need to care about pointers? 
+Do I need to care about pointers? YUP
 How do the driver / sql packages interact with what I need to do? Do I need to implement the functions in driver? 
 
 
@@ -37,3 +37,18 @@ something something changing stuff inside functions
 how do I make it so that the write actually sticks? 
 
 APPARENTLY I just needed to give it *Page instead of Page >:( but hey it works now!!
+
+12/21 8pm - Page works, questions remaining:
+How to pass blocksize as a constant that you can specify the size of an array with 
+How to allow multiple constructors (/ functions) with the same name but different arguments
+Is making a [BLOCKSIZE]byte actually a page from the OS? How do I know / trust that? 
+Also is blocksize in bits or bytes - 4096 bits or 4096 bytes? 
+
+
+Important: need to get block / int sizes from single source eventually - how to pull between pages? 
+ERROR HANDLING EVERYWHERE
+REMEMBER TO CLOSE FILES <- defer thingy?
+
+Error: if you write a page to a block in a file, trying to read from any subsequent block which has not been written to results in "Faield to read block in file: EOF" error and then a correct printing of the block contents (i.e. all 0s)
+
+Problem: read / write functions are only allowed to be written to/from slices, not arrays, which means my page.contents is currently a slice, which - as far as I can tell is worse? Even though I can set capacity at 4096? 

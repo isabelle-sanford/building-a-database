@@ -6,22 +6,18 @@ import (
 )
 
 // is blocksize in bytes or bits?
-const BLOCKSIZE int64 = 256 //! temporary for ease of testing // os.Getpagesize()
+const BLOCKSIZE int64 = 64 //! temporary for ease of testing // os.Getpagesize()
 const INTSIZE int = 8 //strconv.IntSize
 
-type BlockId struct {
-	filename string
-	blknum int // index of location within file
-}
-
+// slice instead of array for now because write is unhappy >:(
 type Page struct {
-	contents [BLOCKSIZE]byte
+	contents []byte
 	//buffer bytes.Buffer
 }
 
 // for data pages
 func makePage(blocksize int64) (p Page) {
-	var b [BLOCKSIZE]byte // temp replacement for blocksize
+	var b []byte = make([]byte, BLOCKSIZE)// temp replacement for blocksize
 	//bb := bytes.NewBuffer(b)
 	p = Page{b} //, *bb}
 	return
@@ -74,23 +70,23 @@ func (p *Page) setBytes(offset int, b []byte) {
 	}
 }
 
-func main() {
-	var test int64 = 1029388
+// func main() {
+// 	var test int64 = 1029388
 
-	var p Page = makePage(BLOCKSIZE)
+// 	var p Page = makePage(BLOCKSIZE)
 
-	fmt.Println("Trying to insert the integer ", test)
-	p.setInt(128, test)
+// 	fmt.Println("Trying to insert the integer ", test)
+// 	p.setInt(128, test)
 
-	fmt.Printf("The contents now look like %x\n", p.contents[128:200])
+// 	fmt.Printf("The contents now look like %x\n", p.contents[128:200])
 
-	retint := p.getInt(128)
+// 	retint := p.getInt(128)
 
-	//etcint := p.getInt(0)
+// 	//etcint := p.getInt(0)
 
 	
-	fmt.Println(retint)
-	//fmt.Println(etcint)
+// 	fmt.Println(retint)
+// 	//fmt.Println(etcint)
 
-	//fmt.Println(p.contents)
-}
+// 	//fmt.Println(p.contents)
+// }
