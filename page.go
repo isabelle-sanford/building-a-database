@@ -9,6 +9,10 @@ import (
 const BLOCKSIZE int64 = 256 //! temporary for ease of testing // os.Getpagesize()
 const INTSIZE int = 8 //strconv.IntSize
 
+type BlockId struct {
+	filename string
+	blknum int // index of location within file
+}
 
 type Page struct {
 	contents [BLOCKSIZE]byte

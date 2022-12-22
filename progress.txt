@@ -1,0 +1,15 @@
+CHAPTER 3 - DISK & FILE MANAGEMENT
+
+Block, Page 
+
+BlockId:
+X contains filename and ID
+
+Page:
+X can read and write ints and bytes to anywhere within the block-sized page
+O read/write strings? 
+
+
+FileMgr
+
+
