@@ -49,6 +49,57 @@ Important: need to get block / int sizes from single source eventually - how to 
 ERROR HANDLING EVERYWHERE
 REMEMBER TO CLOSE FILES <- defer thingy?
 
-Error: if you write a page to a block in a file, trying to read from any subsequent block which has not been written to results in "Faield to read block in file: EOF" error and then a correct printing of the block contents (i.e. all 0s)
+Error: if you write a page to a block in a file, trying to read from any subsequent block which has not been written to results in "Failed to read block in file: EOF" error and then a correct printing of the block contents (i.e. all 0s)
 
 Problem: read / write functions are only allowed to be written to/from slices, not arrays, which means my page.contents is currently a slice, which - as far as I can tell is worse? Even though I can set capacity at 4096? 
+
+probably need to reopen vsc in this folder and open old go stuff in a separate window to get it to play nice and not have to use terminal
+
+just declaring everything as int64 rather than int, rather than trying to pull which the computer uses at baseline 
+
+the question of where I go next also kinda depends on how easy it will be to build buffer pools and concurrency in later - if it's a real pain then could just do now? maybe just look at ch 4 / 5 to see how hard implementation would be
+
+12/21 11:30pm SUMMARY--------
+Research: 
+Go - refresher on basic structs with methods, slices and arrays, syntax, basic maps, pointers. Probably need more work with slices/arrays, and DEFINITELY more with pointers.
+Packages - os and io will be vital packages, bytes and encoding/binary are helpful, sync will be important if/when concurrency
+DBs/etc - much stronger understanding of the whole filemanager system (of course) as well as exactly how buffers work and interact with files and so on. (I ended up not actually using any buffers really, but I tried for a whiile.)
+
+Coding: 
+Created BlockId, Page, and FileManager objects, all of which are (mostly?) functional. 
+
+Struggles: 
+- Figuring out how to find the size of int on a particular machine and then deciding to use int64 everywhere rather than having to do some casting for various reasons. 
+- Trying very hard to insert a given byte-slice into a particular spot in my byte-array with buffers etc, and eventually just doing it with a for loop through the slice.
+- Actually writing to the array and that lasting outside the function requires the method to be on *Page rather than Page so you're changing the actual values, or something. Pointers are bad.  
+- Figuring out how to access variables/etc from other files.
+- Writing, appending, and reading a file - can't just use Open() for that since you don't get write perms for just that, need to specify in OpenFile() function. 
+- A write-to-page operation will not overwrite whatever was on the page previously (or possibly won't overwrite iff it's 0? not sure yet), so need to create new pages each time I want to pull a new thing rather than be able to reuse the same page (which isn't that much of a problem but does seem like it won't work with the buffer pool optimizations)
+
+
+Later improvements / optimizations / things that are still bad:
+- There's only one constructor for Page, and I don't know how to make two functions with the same name that take different arguments. 
+- The contents of Page are a slice of capacity blocksize, rather than an array as I'd prefer. There are several constraints here, but one is that the constructor is passing the blocksize but using that as the size of the array is an error because the argument isn't constant. 
+- Files closing should use the defer keyword, probably? 
+- I don't know what the permission integers mean for when I create/open a file in getFile(), and it's hard-coded
+- Page can read/write bytes and integers but should add strings. 
+- Testing is ok on page.go but a little messy / uncommented / unclear from cmd line. Testing in filemanager could use serious improvement. 
+- I don't understand the format in which it prints numbers by default (i.e. 1029388 is [152 212 125])
+- Need to capitalize functions which will be needed outside of this package (and kinda decide how packaging will work / if I want more than one)
+- Making the initial dbDirectory / how to tell if new for file manager is a little confusing since it's not a distinct struct. (should it be?)
+- WAY MORE ERROR CHECKING EVERYWHERE (esp in page.go, file manager I was forced to add them more to figure out what was happening)
+- make sure page to be written to is fully overwrote
+- Debug EOF error when reading an unwritten-to block that's after a written-to one
+
+
+Other stuff - 
+
+Writing to pages is done via a for loop assigning each byte in the input to its corresponding index in the array. There may or may not be a better way to do this using buffers. (As far as I could tell, there were no buffers that had read, write, and seek functionality - at most two of the three.)
+
+The requester must know whether they want an int or bytes; if they ask for bytes when it's an int, it'll interpret that int as the length of the byte-string and potentially cause a lot of problems. This should be fine, I think? 
+
+Up next: 
+Debug file manager a little more and add more thorough testing. 
+Look at exercises for chapter 3 and decide if any would be helpful to implement. 
+Read chapter 6 carefully, and try to implement. 
+Optional: Try to add in basics of ch 4 (and maybe 5), if those seem like they'll be incredibly hard to add in later. 

@@ -17,7 +17,7 @@ type Page struct {
 
 // for data pages
 func makePage(blocksize int64) (p Page) {
-	var b []byte = make([]byte, BLOCKSIZE)// temp replacement for blocksize
+	var b []byte = make([]byte, blocksize)// temp replacement for blocksize
 	//bb := bytes.NewBuffer(b)
 	p = Page{b} //, *bb}
 	return
