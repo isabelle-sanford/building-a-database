@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+type FileMgr struct {
+	// ?????
+}
+
 var dbDir string 
 
 // const BLOCKSIZE int64 = 256 // ! temp, real on this computer is 4096
@@ -49,6 +53,7 @@ func writeBlock(blk BlockId, p Page) {
 }
 
 // PRIVATE TO FILE MANAGER
+// attach to file manager object? 
 // return opened file, create first if it doesn't exist
 func getFile(filename string) *os.File { // might need pointer?
 	_, ok := openFiles[filename]

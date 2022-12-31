@@ -103,3 +103,24 @@ Debug file manager a little more and add more thorough testing.
 Look at exercises for chapter 3 and decide if any would be helpful to implement. 
 Read chapter 6 carefully, and try to implement. 
 Optional: Try to add in basics of ch 4 (and maybe 5), if those seem like they'll be incredibly hard to add in later. 
+
+
+12/31/22 
+starting 12pm, with recpage.go (trying to implement ch 6)
+
+todo: 
+TEST SCHLAYOUT FUNCS
+recordPage is. real tricky without having done the transaction manager
+Question - get/set funcs? or no? 
+COMMENT EVERYTHINGGGGG
+feeling like recpage in particular is a bit too java-like (but I don't understand well enough to fix bc I haven't done ch 3-4 yet) (sigh)
+might just need to do those proper, since hard to even test without that 
+but hey then there's concurrency! 
+need to update go
+having duplicate setInt and setString for everything feels... there seems like there should be a better way in Go (esp as you add more types...)
+did recordpage just copying, but doing tablescan just with the API and seeing how I do
+might need to go back and make a filemanager object
+2:30pm checking how well I did with TableScan (feel pretty good, it was mostly transferring over from RecordPage actually?)
+can almost certainly switch blknum back from int64 in BlockId sigh
+conveniently this author also provides v good tests! 
+3:30pm finish ch 6 stuff, at least in theory 
