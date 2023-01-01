@@ -150,3 +150,11 @@ and fixed that!
 
 5pm starting on ch 4 ig 
 made addLogPage() func (still can't do func override things)
+
+6pm gotta leave, need to figure out what boundary is but otherwise LogMgr is pretty set
+
+
+12/31/22 11pm
+
+maybe I should just convert all ints to int64 >:(
+finished(?) log manager, I think - still needs testing though

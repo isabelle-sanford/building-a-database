@@ -6,7 +6,7 @@ import (
 )
 
 // is blocksize in bytes or bits?
-const BLOCKSIZE int64 = 64 //! temporary for ease of testing // os.Getpagesize()
+const BLOCKSIZE int = 64 //! temporary for ease of testing // os.Getpagesize()
 const INTSIZE int = 8 //strconv.IntSize
 
 // slice instead of array for now because write is unhappy >:(
