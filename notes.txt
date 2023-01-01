@@ -141,8 +141,12 @@ X fix tests for filemanager.go
 - start filling in memmgr.go 
 - comment a bunch of stuff 
 - update version of go
+- get simpledb code thingy? 
 
 4:30pm start tests for filemanager.go 
 AND DONE :D 
 (except for the weird EOF error from before)
 and fixed that! 
+
+5pm starting on ch 4 ig 
+made addLogPage() func (still can't do func override things)

@@ -32,6 +32,7 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 	return FileMgr{dbDir, isNew, openFiles, blocksize}
 }
 
+// does this need to both return and take arg for a page? 
 func (fm FileMgr) readBlock(blk BlockId, p Page) (Page, bool) {
 	var f *os.File = fm.getFile(blk.filename)
 

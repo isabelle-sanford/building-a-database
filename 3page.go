@@ -16,11 +16,16 @@ type Page struct {
 }
 
 // for data pages
-func makePage(blocksize int64) (p Page) {
+func makePage(blocksize int) (p Page) {
 	var b []byte = make([]byte, blocksize)// temp replacement for blocksize
 	//bb := bytes.NewBuffer(b)
 	p = Page{b} //, *bb}
 	return
+}
+
+// ? use? 
+func makeLogPage(b []byte) Page {
+	return Page{b}
 }
 
 func (p Page) getInt(offset int) int64 {
