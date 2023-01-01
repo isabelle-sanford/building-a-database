@@ -1,11 +1,11 @@
-package main
+package mydb
 
 type TableScan struct {
 	tx      Transaction
 	tblname string
 	layout  Layout
 	rp       RecordPage
-	filename string // probs should be filemanager
+	filename string // probs should be filemanager (when > 1 file)
 	currslot int
 }
 
@@ -50,7 +50,7 @@ func (t TableScan) next() bool {
 func (t TableScan) moveToRid(r RID) {
 	t.currslot = r.slot
 	if r.blknum != int(t.rp.blk.blknum) {
-		t.moveToBlock(int64(r.blknum))
+		t.moveToBlock(r.blknum)
 	}
 }
 
@@ -105,7 +105,7 @@ func (t TableScan) moveToNextBlock() {
 
 func (t TableScan) moveToNewBlock() {
 	t.close()
-	newblk := appendNewBlock(t.filename)
+	newblk := t.tx.append(t.filename)
 
 	newrp := makeRecordPage(t.tx, newblk, t.layout)
 	newrp.format()
@@ -114,7 +114,7 @@ func (t TableScan) moveToNewBlock() {
 	t.currslot = -1
 }
 
-func (t TableScan) moveToBlock(newblknum int64) {
+func (t TableScan) moveToBlock(newblknum int) {
 	if newblknum == t.rp.blk.blknum {
 		return
 	}
@@ -127,8 +127,5 @@ func (t TableScan) moveToBlock(newblknum int64) {
 }
 
 func (t TableScan) atLastBlock() bool {
-	if openFiles[t.filename] >= t.rp.blk.blknum {
-		return true
-	}
-	return false
+	return t.tx.size(t.filename) -1 == t.rp.blk.blknum 
 }

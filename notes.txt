@@ -50,6 +50,7 @@ ERROR HANDLING EVERYWHERE
 REMEMBER TO CLOSE FILES <- defer thingy?
 
 Error: if you write a page to a block in a file, trying to read from any subsequent block which has not been written to results in "Failed to read block in file: EOF" error and then a correct printing of the block contents (i.e. all 0s)
+FIXED: EOF error was still returning the empty page that was inserted initially. Now returns both page and err bool. 
 
 Problem: read / write functions are only allowed to be written to/from slices, not arrays, which means my page.contents is currently a slice, which - as far as I can tell is worse? Even though I can set capacity at 4096? 
 
@@ -86,10 +87,10 @@ Later improvements / optimizations / things that are still bad:
 - Testing is ok on page.go but a little messy / uncommented / unclear from cmd line. Testing in filemanager could use serious improvement. 
 - I don't understand the format in which it prints numbers by default (i.e. 1029388 is [152 212 125])
 - Need to capitalize functions which will be needed outside of this package (and kinda decide how packaging will work / if I want more than one)
-- Making the initial dbDirectory / how to tell if new for file manager is a little confusing since it's not a distinct struct. (should it be?)
+X (DONE) Making the initial dbDirectory / how to tell if new for file manager is a little confusing since it's not a distinct struct. (should it be?)
 - WAY MORE ERROR CHECKING EVERYWHERE (esp in page.go, file manager I was forced to add them more to figure out what was happening)
 - make sure page to be written to is fully overwrote
-- Debug EOF error when reading an unwritten-to block that's after a written-to one
+X (DONE) Debug EOF error when reading an unwritten-to block that's after a written-to one
 
 
 Other stuff - 
@@ -132,3 +133,16 @@ need to re-test filemanager.go (also fix its problems bc there are a couple sigh
 LOOK AT OS PACKAGE FUNCTION Sync(): Sync commits the current contents of the file to stable storage. Typically, this means flushing the file system's in-memory copy of recently written data to disk. 
 (also maybe syscallconn?)
 really need to figure out perms for making files
+ok done! but untested, and really not sure how pathname for dbDir is gonna work ngl
+? how to have testing funcs in each package that aren't technically 'main' - just name test()? ..probs that
+
+TODO:
+X fix tests for filemanager.go 
+- start filling in memmgr.go 
+- comment a bunch of stuff 
+- update version of go
+
+4:30pm start tests for filemanager.go 
+AND DONE :D 
+(except for the weird EOF error from before)
+and fixed that! 

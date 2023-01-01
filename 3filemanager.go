@@ -19,7 +19,7 @@ type BlockId struct {
 }
 
 func makeFileMgr(dbDir string, blocksize int) FileMgr {
-	_, err := os.Open(dbDir) // ! no
+	_, err := os.Open(dbDir) // ! no // might need to close? 
 	isNew := false
 	if errors.Is(err, os.ErrNotExist) { // when do you change from isNew? 
 		isNew = true
@@ -32,31 +32,38 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 	return FileMgr{dbDir, isNew, openFiles, blocksize}
 }
 
-func (fm FileMgr) readBlock(blk BlockId, p Page) Page {
+func (fm FileMgr) readBlock(blk BlockId, p Page) (Page, bool) {
 	var f *os.File = fm.getFile(blk.filename)
 
 	//var b []byte = make([]byte, BLOCKSIZE)
 	_, err := f.ReadAt(p.contents, int64(blk.blknum * fm.blocksize))
 
+	worked := true
+
 	if err != nil {
 		fmt.Println("Failed to read block in file: ", err)
+		worked = false
 	}
 
 	f.Close()
-	return p // ?
+	return p, worked // ?
 }
 
 // write given page to block
-func (fm FileMgr) writeBlock(blk BlockId, p Page) {
+func (fm FileMgr) writeBlock(blk BlockId, p Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
 
 	_, err := f.WriteAt(p.contents, int64(fm.blocksize * blk.blknum))
 
+	worked := true
+
 	if err != nil {
 		fmt.Println("Failed to write block to file: ", err)
+		worked = false
 	}
 
 	f.Close()
+	return worked
 }
 
 // PRIVATE TO FILE MANAGER
@@ -109,9 +116,11 @@ func (fm FileMgr) appendNewBlock(filename string) BlockId {
 
 
 func main() {
-	b0 := appendNewBlock("testfile") // b0
-	b1 := appendNewBlock("testfile")
-	b2 := appendNewBlock("testfile") // b2
+	fm := makeFileMgr("mydb", 64)
+
+	b0 := fm.appendNewBlock("testfile") // b0
+	b1 := fm.appendNewBlock("testfile")
+	b2 := fm.appendNewBlock("testfile") // b2
 
 	var test int64 = 1029388
 	var p Page = makePage(BLOCKSIZE)
@@ -125,25 +134,25 @@ func main() {
 	var p2 Page = makePage(BLOCKSIZE)
 	var p3 Page = makePage(BLOCKSIZE)
 
-	fmt.Println(openFiles)
+	fmt.Println(fm.openFiles)
 
 	//fmt.Println(p.contents)
 
 	fmt.Println(b2)
 
-	writeBlock(b0, p)
-	writeBlock(b1, p)
+	//fm.writeBlock(b0, p)
+	//fm.writeBlock(b1, p)
 
-	retpage0 := readBlock(b0, p0)
+	retpage0, _ := fm.readBlock(b0, p0)
 	fmt.Println("block 0: ", retpage0)
 
-	retpage1 := readBlock(b1, p1)
+	retpage1, _ := fm.readBlock(b1, p1)
 	fmt.Println("block 1: ", retpage1)
 
-	retpage2 := readBlock(b2, p2)
+	retpage2, _ := fm.readBlock(b2, p2)
 	fmt.Println("block 2: ", retpage2)
 
-	retpage3 := readBlock(b2, p3)
+	retpage3, _ := fm.readBlock(b0, p3)
 	fmt.Println("block 2: ", retpage3)
 
 

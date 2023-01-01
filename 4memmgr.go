@@ -1,4 +1,4 @@
-package main
+package mydb
 
 type LogMgr struct {
 	fm FileMgr // ??
