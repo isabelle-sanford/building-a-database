@@ -1,35 +1,42 @@
 package main // for now
 
 import (
+	"errors"
 	"fmt"
 	"os"
 )
 
 type FileMgr struct {
-	// ?????
+	dbDir string // might need to be pointer or os.File
+	isNew bool
+	openFiles map[string]int
+	blocksize int
 }
-
-var dbDir string 
-
-// const BLOCKSIZE int64 = 256 // ! temp, real on this computer is 4096
-// const INTSIZE int64 = 8 //strconv.IntSize
-
-var isNew bool = false
-
-var openFiles map[string]int64 = make(map[string]int64) // filename, # blocks
 
 type BlockId struct {
 	filename string
-	blknum int64 // index of location within file
+	blknum int // index of location within file
 }
 
+func makeFileMgr(dbDir string, blocksize int) FileMgr {
+	_, err := os.Open(dbDir) // ! no
+	isNew := false
+	if errors.Is(err, os.ErrNotExist) { // when do you change from isNew? 
+		isNew = true
+		os.MkdirAll(dbDir, 0666) // !! perms??
+	}
+	// remove any leftover temp tables
 
+	openFiles := make(map[string]int)
 
-func readBlock(blk BlockId, p Page) Page {
-	var f *os.File = getFile(blk.filename)
+	return FileMgr{dbDir, isNew, openFiles, blocksize}
+}
+
+func (fm FileMgr) readBlock(blk BlockId, p Page) Page {
+	var f *os.File = fm.getFile(blk.filename)
 
 	//var b []byte = make([]byte, BLOCKSIZE)
-	_, err := f.ReadAt(p.contents, blk.blknum * BLOCKSIZE)
+	_, err := f.ReadAt(p.contents, int64(blk.blknum * fm.blocksize))
 
 	if err != nil {
 		fmt.Println("Failed to read block in file: ", err)
@@ -40,10 +47,10 @@ func readBlock(blk BlockId, p Page) Page {
 }
 
 // write given page to block
-func writeBlock(blk BlockId, p Page) {
-	var f *os.File = getFile(blk.filename)
+func (fm FileMgr) writeBlock(blk BlockId, p Page) {
+	var f *os.File = fm.getFile(blk.filename)
 
-	_, err := f.WriteAt(p.contents, BLOCKSIZE * blk.blknum)
+	_, err := f.WriteAt(p.contents, int64(fm.blocksize * blk.blknum))
 
 	if err != nil {
 		fmt.Println("Failed to write block to file: ", err)
@@ -55,8 +62,8 @@ func writeBlock(blk BlockId, p Page) {
 // PRIVATE TO FILE MANAGER
 // attach to file manager object? 
 // return opened file, create first if it doesn't exist
-func getFile(filename string) *os.File { // might need pointer?
-	_, ok := openFiles[filename]
+func (fm FileMgr) getFile(filename string) *os.File { // might need pointer?
+	_, ok := fm.openFiles[filename]
 
 	if ok { // filename is in files
 		f, err := os.OpenFile(filename, os.O_RDWR,0666) // ! PERM STUFF
@@ -73,20 +80,20 @@ func getFile(filename string) *os.File { // might need pointer?
 			return nil
 		}
 
-		openFiles[filename] = 0
+		fm.openFiles[filename] = 0
 		return dbTable
 	}
 
 }
 
 // new empty block to the end of a file
-func appendNewBlock(filename string) BlockId {
+func (fm FileMgr) appendNewBlock(filename string) BlockId {
 
-	var f *os.File = getFile(filename)
+	var f *os.File = fm.getFile(filename)
 
 
-	newblknum := openFiles[filename] 
-	openFiles[filename]++
+	newblknum := fm.openFiles[filename] 
+	fm.openFiles[filename]++
 
 	blk := BlockId{filename,newblknum} 
 

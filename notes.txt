@@ -105,7 +105,7 @@ Read chapter 6 carefully, and try to implement.
 Optional: Try to add in basics of ch 4 (and maybe 5), if those seem like they'll be incredibly hard to add in later. 
 
 
-12/31/22 
+12/31/22 12pm
 starting 12pm, with recpage.go (trying to implement ch 6)
 
 todo: 
@@ -124,3 +124,11 @@ might need to go back and make a filemanager object
 can almost certainly switch blknum back from int64 in BlockId sigh
 conveniently this author also provides v good tests! 
 3:30pm finish ch 6 stuff, at least in theory 
+want to implement at least a bit more complexity than in SimpleDB, see problems below / try spanned records maybe? variable length? 
+kind of want to just do ch 7 but also kind of should go back and do earlier chapters 
+ALSO THEY TRIED TO DELIVER BOOK BUT FAILED FOR UNSPECIFIED REASONS SIGHHHH
+okay gonna go back and actually make a FileMgr object 
+need to re-test filemanager.go (also fix its problems bc there are a couple sighh)
+LOOK AT OS PACKAGE FUNCTION Sync(): Sync commits the current contents of the file to stable storage. Typically, this means flushing the file system's in-memory copy of recently written data to disk. 
+(also maybe syscallconn?)
+really need to figure out perms for making files
