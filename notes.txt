@@ -235,5 +235,10 @@ FIXED - turned out to be a problem in fileMgr.appendNewBlock() where it was doin
 
 Had temporary error where on creating log files 0-10, they'd print fine, and then creating additionaly 36-70, the print would work for the first several(?) records (i.e. 170, 169, ...) but somewhere in the middle (like around 155) the prints would only happen for every other record, and skip the rest. Can't recreate now, so hopefully it's fine? 
 
-Dinnertime now; next up is BufferMgr (but since I did a LOT of debugging / work with Page and FileMgr, that shoulddd be a smoother ride as long as I look over it again really carefully before trying any tests.)
+Dinnertime now (6:45); next up is BufferMgr (but since I did a LOT of debugging / work with Page and FileMgr, that shoulddd be a smoother ride as long as I look over it again really carefully before trying any tests.)
 TODO: add test thingies in where appropriate; for now I'm gonna delete all my print statements bc they took up half the thing
+
+8:45 
+separating buffermgr into different file because I should have done that from the start 
+Ordering for BM: check code against book code, fix nil nonsense, write out book tests, debug book tests. Maybe look into how wait() works 
+I read some bits of the Go book and concluded mostly that I should be using a lot more pointers, which is fun
