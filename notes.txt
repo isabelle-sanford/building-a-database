@@ -65,9 +65,7 @@ Research:
 Go - refresher on basic structs with methods, slices and arrays, syntax, basic maps, pointers. Probably need more work with slices/arrays, and DEFINITELY more with pointers.
 Packages - os and io will be vital packages, bytes and encoding/binary are helpful, sync will be important if/when concurrency
 DBs/etc - much stronger understanding of the whole filemanager system (of course) as well as exactly how buffers work and interact with files and so on. (I ended up not actually using any buffers really, but I tried for a whiile.)
-FIXED - turned out to be a problem in fileMgr.appendNewBlock() where it was doing Write(b) and overwriting the first block as empty post-writing (or something? still not super clear but changing to f.WriteAt worked)
 
-Had temporary error where on creating log files 0-10, they'd print fine, and then creating additionaly 36-70, the print would work for the first several(?) records (i.e. 170, 169, ...) but somewhere in the middle (like around 155) the prints would only happen for every other record, and skip the rest. Can't recreate now, so hopefully it's fine? 
 
 Coding: 
 Created BlockId, Page, and FileManager objects, all of which are (mostly?) functional. 
@@ -231,3 +229,11 @@ write works and reads correctly inside flush but not outside
 why is everything doubled when it gets written down in binary (or maybe just ints?)
 
 5:30pm still struggling with error above: the writing of block 0 to the file (via flush) is local and does not survive outside the scope. Writing and reading any blocks 1+ does not have this problem and saves pages to the file perfectly fine. 
+
+6:30pm 
+FIXED - turned out to be a problem in fileMgr.appendNewBlock() where it was doing Write(b) and overwriting the first block as empty post-writing (or something? still not super clear but changing to f.WriteAt worked)
+
+Had temporary error where on creating log files 0-10, they'd print fine, and then creating additionaly 36-70, the print would work for the first several(?) records (i.e. 170, 169, ...) but somewhere in the middle (like around 155) the prints would only happen for every other record, and skip the rest. Can't recreate now, so hopefully it's fine? 
+
+Dinnertime now; next up is BufferMgr (but since I did a LOT of debugging / work with Page and FileMgr, that shoulddd be a smoother ride as long as I look over it again really carefully before trying any tests.)
+TODO: add test thingies in where appropriate; for now I'm gonna delete all my print statements bc they took up half the thing

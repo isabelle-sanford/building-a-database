@@ -28,12 +28,7 @@ func makeLogMgr(fm FileMgr, logfile string) LogMgr {
 		currBlock = fm.appendNewBlock(logfile)
 		lgpage.setInt(0, int64(fm.blocksize))
 		fm.writeBlock(currBlock, lgpage)
-
-
-		// fm.readBlock(currBlock, lgpage) // probs dont need
-		// fmt.Printf("lgpage at lgmgr creation: %v\n", lgpage)
 	}
-
 
 	return LogMgr{
 		fm, 
@@ -44,15 +39,12 @@ func makeLogMgr(fm FileMgr, logfile string) LogMgr {
 		0,
 	}
 }
+
 // appends to a block in BACKWARDS order, i.e. oldest rec is last
 func (lm *LogMgr) append(rec []byte) int {
-
-
 	boundary := int(lm.logPage.getInt(0))
 	recsize := len(rec) // + INTSIZE
 	needBytes := recsize + INTSIZE
-
-	//fmt.Printf("Boundary %d, Recsize %d, needBytes %d\n", boundary, recsize, needBytes)
 
 	// individual log is too big
 	if needBytes > lm.fm.blocksize {
@@ -61,24 +53,9 @@ func (lm *LogMgr) append(rec []byte) int {
 
 	// not enouch space to fit this rec
 	if boundary - needBytes < INTSIZE {
-		//lm.PRINTBLOCK0("\npre flush in append: ")
 		lm.flush() // ... was it just flush() before...?
-		// flush func
-		// fmt.Printf("\n~~FLUSHING %v~~", lm.currblock)
-		// lm.fm.writeBlock(lm.currblock, lm.logPage)
-		// lm.lastSavedLSN = lm.currlsn
-		
-		//lm.PRINTBLOCK0("Just after flush, in append: ")
-
 		lm.currblock = lm.appendNewBlock() 
-		
-		//fmt.Printf("Switching to next block\n")
-		
-		//lm.PRINTBLOCK0("After appending new block (in append)")
-
 		boundary = int(lm.logPage.getInt(0)) // ? isn't this always blocksize?
-
-		
 	}
 	recpos := boundary - needBytes
 
@@ -86,8 +63,6 @@ func (lm *LogMgr) append(rec []byte) int {
 	lm.logPage.setBytes(recpos, rec)
 	
 	lm.currlsn += 1
-
-	//fmt.Printf("Added %d bytes at offset %d\n", needBytes, recpos)
 		
 	return lm.currlsn
 }
@@ -104,34 +79,25 @@ func (lm LogMgr) iterator() func() []byte {
 	lsn := lm.lastSavedLSN // ???
 	blknum := lm.currblock.blknum
 
-
 	lm.fm.readBlock(BlockId{lm.logfile, blknum}, pg)
 	recpos := int(pg.getInt(0)) 
 
 	fmt.Printf("LSN %d, blknum %d, recpos %d\n", lsn, blknum, recpos)
-	//fmt.Printf("Starting with blk %d contents: %v\n", blknum, pg)
 
 	return func() []byte {
 		
 		if recpos >= lm.fm.blocksize  { 
-			// todo check if this is 1st block
-			//fmt.Println("Switching block")
 			blknum -= 1
 			if blknum < 0 {
 				return nil // apparently this is ok? 
 			}
 			lm.fm.readBlock(BlockId{lm.logfile, blknum}, pg) // probs don't need pg, _ ? 
 			recpos = int(pg.getInt(0))
-			//fmt.Printf("Switching to blk %d contents: %v\n", blknum, pg)
 		}
 		lsn-- // ehhh // also not actually returning it anywhere? 
 		ret := pg.getBytes(recpos)
 
-		//fmt.Printf("Returning recpos %d with lsn %d\n", recpos, lsn)
-
 		recpos += int(pg.getInt(recpos)) + INTSIZE // ! text is different but I THINK this also works
-
-		//fmt.Printf("Shifting to %d\n", recpos)
 
 		return ret
 	}
@@ -139,25 +105,16 @@ func (lm LogMgr) iterator() func() []byte {
 
 // aux for logmgr
 func (lm LogMgr) appendNewBlock() BlockId {
-	
 	blk := lm.fm.appendNewBlock(lm.logfile) // !
-	//fmt.Printf("\nBlock being appended: %v", blk)
-	//lm.PRINTBLOCK0("In appendNewBlock right after fm.appendNB:")
-	
 	lm.logPage.setInt(0, int64(lm.fm.blocksize))
 	lm.fm.writeBlock(blk, lm.logPage) // ? 
 	return blk
 }
+
 func (lm *LogMgr) flush() {
-	//fmt.Printf("\n~~FLUSHING %v~~", lm.currblock)
-	
 	lm.fm.writeBlock(lm.currblock, lm.logPage)
 	lm.lastSavedLSN = lm.currlsn
-
-	//lm.PRINTBLOCK0("INSIDE flush after write: ")
-	//fmt.Print(lm.logPage)
 }
-
 
 
 
@@ -170,8 +127,6 @@ func main() {
 		iter := lm.iterator()
 		next := iter()
 
-		//fmt.Printf("next #1: %v", next)
-		
 		for  {
 			if next == nil {
 				break
@@ -204,15 +159,11 @@ func main() {
 		}
 	}
 
-
-
 	createRecords(1, 10)
 	printLogRecords("\n\nThe log file now has these records---------------- \n")
 	createRecords(36, 70)
 	lm.flushLSN(65)
 	printLogRecords("\nThe log file now has these records: ")
-
-
 }
 
 
