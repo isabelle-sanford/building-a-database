@@ -242,3 +242,6 @@ TODO: add test thingies in where appropriate; for now I'm gonna delete all my pr
 separating buffermgr into different file because I should have done that from the start 
 Ordering for BM: check code against book code, fix nil nonsense, write out book tests, debug book tests. Maybe look into how wait() works 
 I read some bits of the Go book and concluded mostly that I should be using a lot more pointers, which is fun
+
+1/2/23 12pm
+Going to start with an attempt to convert things into pointers, because doing it later will just be way more frustrating 

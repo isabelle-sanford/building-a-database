@@ -33,7 +33,7 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 }
 
 // does this need to both return and take arg for a page? 
-func (fm FileMgr) readBlock(blk BlockId, p Page) (Page, bool) {
+func (fm FileMgr) readBlock(blk BlockId, p *Page) (*Page, bool) {
 	var f *os.File = fm.getFile(blk.filename)
 
 	//var b []byte = make([]byte, BLOCKSIZE)
@@ -48,12 +48,12 @@ func (fm FileMgr) readBlock(blk BlockId, p Page) (Page, bool) {
 
 	//fmt.Printf("Reading block %v (size %d) and returning %v\n", blk, n, p)
 
-	f.Close()
-	return p, worked // ?
+	defer f.Close()
+	return p, worked // could maybe just return bool?
 }
 
 // write given page to block
-func (fm FileMgr) writeBlock(blk BlockId, p Page) bool {
+func (fm FileMgr) writeBlock(blk BlockId, p *Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
 
 	_, err := f.WriteAt(p.contents, int64(fm.blocksize * blk.blknum))
@@ -65,10 +65,6 @@ func (fm FileMgr) writeBlock(blk BlockId, p Page) bool {
 		worked = false
 	}
 
-	//fmt.Printf("Writing block %v as %v\n", blk, p)
-
-	//fm.readBlock(blk, p)
-	//fmt.Printf("Worked? %v OR %v\n", tryread, worked)
 
 	f.Close()
 	return worked
@@ -131,18 +127,18 @@ func testFileMgr() {
 	b2 := fm.appendNewBlock("testfile") // b2
 
 	var test int64 = 1029388
-	var p Page = makePage(fm.blocksize)
+	var p *Page = makePage(fm.blocksize)
 	p.setInt(16, test)
 	p.setString(34, "test")
 
-	var pp Page = makePage(fm.blocksize)
+	var pp *Page = makePage(fm.blocksize)
 	pp.setInt(0, 809)
 	pp.setString(30, "hello world")
 
 	// ! MUST use distinct pages for reading, else what's written to the page-to-read stays there even when you overwrite it with a different block to read
 	// I think
 	// not 100% sure
-	var p0 Page = makePage(fm.blocksize)
+	var p0 *Page = makePage(fm.blocksize)
 	// var p1 Page = makePage(fm.blocksize)
 	// var p2 Page = makePage(fm.blocksize)
 	// var p3 Page = makePage(fm.blocksize)

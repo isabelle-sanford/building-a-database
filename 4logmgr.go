@@ -9,7 +9,7 @@ type LogMgr struct {
 	logfile string // filename of log file
 	currlsn int
 	currblock BlockId
-	logPage Page
+	logPage Page // could be *Page? not sure which to use
 	lastSavedLSN int
 	//blocksize int // in filemgr
 	// lsn list? 
@@ -35,7 +35,7 @@ func makeLogMgr(fm FileMgr, logfile string) LogMgr {
 		logfile, 
 		0, 
 		currBlock, 
-		lgpage, // I guess?
+		*lgpage, // I guess? 
 		0,
 	}
 }
@@ -59,20 +59,22 @@ func (lm *LogMgr) append(rec []byte) int {
 	}
 	recpos := boundary - needBytes
 
-	lm.logPage.setInt(0, int64(recpos)) // ??
-	lm.logPage.setBytes(recpos, rec)
+	lm.logPage.setInt(0, int64(recpos)) // set byte 0 to loc of newest (smallest) record
+	lm.logPage.setBytes(recpos, rec) // actually write record to place
 	
 	lm.currlsn += 1
 		
 	return lm.currlsn
 }
-func (lm LogMgr) flushLSN(lsn int) {
+
+func (lm *LogMgr) flushLSN(lsn int) {
 	if lsn >= lm.lastSavedLSN { // if not already saved
 		lm.flush()
 	}
 }
-// maybe also return a hasNext func? 
-func (lm LogMgr) iterator() func() []byte {
+
+// could also return a hasNext func? 
+func (lm *LogMgr) iterator() func() []byte {
 	lm.flush()
 
 	pg := makePage(lm.fm.blocksize)
@@ -104,15 +106,15 @@ func (lm LogMgr) iterator() func() []byte {
 } 
 
 // aux for logmgr
-func (lm LogMgr) appendNewBlock() BlockId {
+func (lm *LogMgr) appendNewBlock() BlockId {
 	blk := lm.fm.appendNewBlock(lm.logfile) // !
 	lm.logPage.setInt(0, int64(lm.fm.blocksize))
-	lm.fm.writeBlock(blk, lm.logPage) // ? 
+	lm.fm.writeBlock(blk, &lm.logPage) // ? 
 	return blk
 }
 
 func (lm *LogMgr) flush() {
-	lm.fm.writeBlock(lm.currblock, lm.logPage)
+	lm.fm.writeBlock(lm.currblock, &lm.logPage)
 	lm.lastSavedLSN = lm.currlsn
 }
 

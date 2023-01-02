@@ -16,18 +16,18 @@ type Page struct {
 }
 
 // for data pages
-func makePage(blocksize int) (p Page) {
+func makePage(blocksize int) (p *Page) {
 	var b []byte = make([]byte, blocksize)// temp replacement for blocksize
 	//bb := bytes.NewBuffer(b)
-	p = Page{b} //, *bb}
+	p = &Page{b} //, *bb}
 	return
 }
 
-func makeLogPage(b []byte) Page {
-	return Page{b}
+func makeLogPage(b []byte) *Page {
+	return &Page{b}
 }
 
-func (p Page) getInt(offset int) int64 {
+func (p *Page) getInt(offset int) int64 {
 	var b int64
 
 	offsetLoc := p.contents[offset:offset + INTSIZE]
@@ -60,7 +60,7 @@ func (p *Page) setInt(offset int, value int64) {
 	//fmt.Printf("Wrote to %d as int %d (%d non-zero bytes i.e. %v)\n", offset, value, n, inBytes2)
 }
 
-func (p Page) getBytes(offset int) []byte {
+func (p *Page) getBytes(offset int) []byte {
 	//fmt.Printf("Trying to get bytes at %d\n", offset)
 	len := p.getInt(offset)
 
@@ -87,7 +87,7 @@ func (p *Page) setBytes(offset int, b []byte) {
 	//fmt.Printf("at %d, contents %v\n",start, p.contents)
 }
 
-func (p Page) getString(offset int) string {
+func (p *Page) getString(offset int) string {
 	b := p.getBytes(offset)
 	return string(b)
 }
@@ -108,7 +108,7 @@ func (p *Page) setString(offset int, val string) {
 func testPage() {
 	var test int64 = 1029388
 
-	var p Page = makePage(BLOCKSIZE)
+	var p *Page = makePage(BLOCKSIZE)
 
 	fmt.Println("Trying to insert the integer ", test)
 	p.setInt(128, test)
