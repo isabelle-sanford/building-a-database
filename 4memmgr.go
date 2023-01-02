@@ -70,7 +70,7 @@ func (lm *LogMgr) append(rec []byte) int {
 		
 		//lm.PRINTBLOCK0("Just after flush, in append: ")
 
-		lm.currblock = lm.appendNewBlock() // !
+		lm.currblock = lm.appendNewBlock() 
 		
 		//fmt.Printf("Switching to next block\n")
 		
@@ -105,8 +105,6 @@ func (lm LogMgr) iterator() func() []byte {
 	blknum := lm.currblock.blknum
 
 
-	idk := 0
-
 	lm.fm.readBlock(BlockId{lm.logfile, blknum}, pg)
 	recpos := int(pg.getInt(0)) 
 
@@ -115,7 +113,7 @@ func (lm LogMgr) iterator() func() []byte {
 
 	return func() []byte {
 		
-		if recpos >= lm.fm.blocksize || idk > 15 { 
+		if recpos >= lm.fm.blocksize  { 
 			// todo check if this is 1st block
 			//fmt.Println("Switching block")
 			blknum -= 1
@@ -134,8 +132,6 @@ func (lm LogMgr) iterator() func() []byte {
 		recpos += int(pg.getInt(recpos)) + INTSIZE // ! text is different but I THINK this also works
 
 		//fmt.Printf("Shifting to %d\n", recpos)
-		idk++
-
 
 		return ret
 	}
@@ -166,7 +162,7 @@ func (lm *LogMgr) flush() {
 
 
 func main() {
-	fm := makeFileMgr("mydb", 400)
+	fm := makeFileMgr("mydb", 80)
 	lm := makeLogMgr(fm, "logfile")
 
 	printLogRecords := func (msg string) {
@@ -210,7 +206,7 @@ func main() {
 
 
 
-	createRecords(1, 35)
+	createRecords(1, 10)
 	printLogRecords("\n\nThe log file now has these records---------------- \n")
 	createRecords(36, 70)
 	lm.flushLSN(65)
