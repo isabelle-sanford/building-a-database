@@ -18,12 +18,32 @@ type BlockId struct {
 	blknum int // index of location within file
 }
 
+// TODO TEST
+func (fm *FileMgr) makeBlock(filename string, blknum int) BlockId {
+	// fmt.Printf("Running makeBlock(%s, %d)\n", filename, blknum)
+	// fmt.Println(fm.openFiles)
+	fm.getFile(filename) // making sure file is actually created
+	// (and thus in openFiles)
+	bi := BlockId{filename, blknum}
+	for blknum >= fm.openFiles[filename] {
+		//fmt.Printf("That block does not exist yet!\n")
+		fm.appendNewBlock(filename) 
+		p := makePage(fm.blocksize)
+		fm.writeBlock(bi, p)
+		//fmt.Printf("Making (new) block %v, currently containing %v\n", bi, p)
+	}
+
+	
+
+	return BlockId{filename, blknum}
+}
+
 func makeFileMgr(dbDir string, blocksize int) FileMgr {
 	_, err := os.Open(dbDir) // ! no // might need to close? 
 	isNew := false
 	if errors.Is(err, os.ErrNotExist) { // when do you change from isNew? 
 		isNew = true
-		os.MkdirAll(dbDir, 0666) // !! perms??
+		os.MkdirAll(dbDir, 0777) // !! perms??
 	}
 	// remove any leftover temp tables
 
@@ -33,7 +53,7 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 }
 
 // does this need to both return and take arg for a page? 
-func (fm FileMgr) readBlock(blk BlockId, p *Page) (*Page, bool) {
+func (fm *FileMgr) readBlock(blk BlockId, p *Page) (bool) {
 	var f *os.File = fm.getFile(blk.filename)
 
 	//var b []byte = make([]byte, BLOCKSIZE)
@@ -49,11 +69,11 @@ func (fm FileMgr) readBlock(blk BlockId, p *Page) (*Page, bool) {
 	//fmt.Printf("Reading block %v (size %d) and returning %v\n", blk, n, p)
 
 	defer f.Close()
-	return p, worked // could maybe just return bool?
+	return worked // could maybe just return bool?
 }
 
 // write given page to block
-func (fm FileMgr) writeBlock(blk BlockId, p *Page) bool {
+func (fm *FileMgr) writeBlock(blk BlockId, p *Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
 
 	_, err := f.WriteAt(p.contents, int64(fm.blocksize * blk.blknum))
@@ -66,18 +86,21 @@ func (fm FileMgr) writeBlock(blk BlockId, p *Page) bool {
 	}
 
 
-	f.Close()
+	defer f.Close()
 	return worked
 }
 
 // PRIVATE TO FILE MANAGER
 // attach to file manager object? 
 // return opened file, create first if it doesn't exist
-func (fm FileMgr) getFile(filename string) *os.File { // might need pointer?
+func (fm *FileMgr) getFile(filename string) *os.File { // might need pointer?
 	_, ok := fm.openFiles[filename]
 
+	path := filename // fmt.Sprintf("../%s/%s", fm.dbDir, filename)
+	//fmt.Println(path)
+
 	if ok { // filename is in files
-		f, err := os.OpenFile(filename, os.O_RDWR,0666) // ! PERM STUFF
+		f, err := os.OpenFile(path, os.O_RDWR,0666) // ! PERM STUFF
 
 		if err != nil {
 			fmt.Println("Failed to open file: ", err)
@@ -85,7 +108,7 @@ func (fm FileMgr) getFile(filename string) *os.File { // might need pointer?
 
 		return f
 	} else {
-		dbTable, err := os.Create(filename)
+		dbTable, err := os.Create(path)
 		if err != nil {
 			fmt.Println("Failed to create file: ", err)
 			return nil
@@ -98,7 +121,7 @@ func (fm FileMgr) getFile(filename string) *os.File { // might need pointer?
 }
 
 // new empty block to the end of a file
-func (fm FileMgr) appendNewBlock(filename string) BlockId {
+func (fm *FileMgr) appendNewBlock(filename string) BlockId {
 
 	var f *os.File = fm.getFile(filename)
 
@@ -152,19 +175,19 @@ func testFileMgr() {
 	fm.writeBlock(b0, p)
 	//
 
-	retpage0, _ := fm.readBlock(b0, p0)
-	fmt.Println("block 0: ", retpage0)
+	fm.readBlock(b0, p0)
+	fmt.Println("block 0: ", p0)
 
-	retpage1, _ := fm.readBlock(b1, p0)
-	fmt.Println("block 1: ", retpage1)
+	fm.readBlock(b1, p0)
+	fmt.Println("block 1: ", p0)
 
-	retpage2, _ := fm.readBlock(b2, p0)
-	fmt.Println("block 2: ", retpage2)
+	fm.readBlock(b2, p0)
+	fmt.Println("block 2: ", p0)
 
 	fm.writeBlock(b2, pp)
 
-	retpage3, _ := fm.readBlock(b2, p0)
-	fmt.Println("block 2 post write: ", retpage3)
+	fm.readBlock(b2, p0)
+	fmt.Println("block 2 post write: ", p0)
 
 
 
