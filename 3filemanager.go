@@ -42,9 +42,11 @@ func (fm FileMgr) readBlock(blk BlockId, p Page) (Page, bool) {
 	worked := true
 
 	if err != nil {
-		fmt.Println("Failed to read block in file: ", err)
+		fmt.Println("Failed to read block in file: ", blk, err)
 		worked = false
 	}
+
+	//fmt.Printf("Reading block %v (size %d) and returning %v\n", blk, n, p)
 
 	f.Close()
 	return p, worked // ?
@@ -62,6 +64,11 @@ func (fm FileMgr) writeBlock(blk BlockId, p Page) bool {
 		fmt.Println("Failed to write block to file: ", err)
 		worked = false
 	}
+
+	//fmt.Printf("Writing block %v as %v\n", blk, p)
+
+	//fm.readBlock(blk, p)
+	//fmt.Printf("Worked? %v OR %v\n", tryread, worked)
 
 	f.Close()
 	return worked
@@ -101,13 +108,13 @@ func (fm FileMgr) appendNewBlock(filename string) BlockId {
 
 
 	newblknum := fm.openFiles[filename] 
-	fm.openFiles[filename]++
-
 	blk := BlockId{filename,newblknum} 
 
-	var b []byte = make([]byte, BLOCKSIZE)
+	fm.openFiles[filename]++
 
-	f.Write(b) 
+	var b []byte = make([]byte, fm.blocksize) // ! using BLOCKSIZE does... something
+
+	f.WriteAt(b, int64(newblknum * fm.blocksize)) 
 
 	f.Close()
 	
@@ -116,7 +123,7 @@ func (fm FileMgr) appendNewBlock(filename string) BlockId {
 
 
 
-func main() {
+func testFileMgr() {
 	fm := makeFileMgr("mydb", 64)
 
 	b0 := fm.appendNewBlock("testfile") // b0
@@ -124,37 +131,44 @@ func main() {
 	b2 := fm.appendNewBlock("testfile") // b2
 
 	var test int64 = 1029388
-	var p Page = makePage(BLOCKSIZE)
+	var p Page = makePage(fm.blocksize)
 	p.setInt(16, test)
+	p.setString(34, "test")
+
+	var pp Page = makePage(fm.blocksize)
+	pp.setInt(0, 809)
+	pp.setString(30, "hello world")
 
 	// ! MUST use distinct pages for reading, else what's written to the page-to-read stays there even when you overwrite it with a different block to read
 	// I think
 	// not 100% sure
-	var p0 Page = makePage(BLOCKSIZE)
-	var p1 Page = makePage(BLOCKSIZE)
-	var p2 Page = makePage(BLOCKSIZE)
-	var p3 Page = makePage(BLOCKSIZE)
+	var p0 Page = makePage(fm.blocksize)
+	// var p1 Page = makePage(fm.blocksize)
+	// var p2 Page = makePage(fm.blocksize)
+	// var p3 Page = makePage(fm.blocksize)
 
-	fmt.Println(fm.openFiles)
+	fmt.Printf("FM files: %v\n", fm.openFiles)
+	fmt.Printf("Test page looks like: %v\n", p.contents)
 
-	//fmt.Println(p.contents)
 
-	fmt.Println(b2)
+	fmt.Println("Writing test page to block 0")
 
-	//fm.writeBlock(b0, p)
-	//fm.writeBlock(b1, p)
+	fm.writeBlock(b0, p)
+	//
 
 	retpage0, _ := fm.readBlock(b0, p0)
 	fmt.Println("block 0: ", retpage0)
 
-	retpage1, _ := fm.readBlock(b1, p1)
+	retpage1, _ := fm.readBlock(b1, p0)
 	fmt.Println("block 1: ", retpage1)
 
-	retpage2, _ := fm.readBlock(b2, p2)
+	retpage2, _ := fm.readBlock(b2, p0)
 	fmt.Println("block 2: ", retpage2)
 
-	retpage3, _ := fm.readBlock(b0, p3)
-	fmt.Println("block 2: ", retpage3)
+	fm.writeBlock(b2, pp)
+
+	retpage3, _ := fm.readBlock(b2, p0)
+	fmt.Println("block 2 post write: ", retpage3)
 
 
 

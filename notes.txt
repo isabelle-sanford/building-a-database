@@ -49,7 +49,7 @@ Important: need to get block / int sizes from single source eventually - how to 
 ERROR HANDLING EVERYWHERE
 REMEMBER TO CLOSE FILES <- defer thingy?
 
-Error: if you write a page to a block in a file, trying to read from any subsequent block which has not been written to results in "Failed to read block in file: EOF" error and then a correct printing of the block contents (i.e. all 0s)
+FIXED: Error - if you write a page to a block in a file, trying to read from any subsequent block which has not been written to results in "Failed to read block in file: EOF" error and then a correct printing of the block contents (i.e. all 0s)
 FIXED: EOF error was still returning the empty page that was inserted initially. Now returns both page and err bool. 
 
 Problem: read / write functions are only allowed to be written to/from slices, not arrays, which means my page.contents is currently a slice, which - as far as I can tell is worse? Even though I can set capacity at 4096? 
@@ -138,7 +138,7 @@ ok done! but untested, and really not sure how pathname for dbDir is gonna work 
 
 TODO:
 X fix tests for filemanager.go 
-- start filling in memmgr.go 
+X start filling in memmgr.go 
 - comment a bunch of stuff 
 - update version of go
 - get simpledb code thingy? 
@@ -157,4 +157,67 @@ made addLogPage() func (still can't do func override things)
 12/31/22 11pm
 
 maybe I should just convert all ints to int64 >:(
-finished(?) log manager, I think - still needs testing though
+12am - finished(?) log manager, I think - still needs testing though
+figure out how to do null values for structs? if possible? 
+12:30am - first attempt at buffer / buffer manager
+this nil stuff is VERY ANNOYING
+buffermanager is functional except for:
+- the waiting for an open pin thing 
+- trying to return either a buffer or nil
+
+feels like FileMgr, LogMgr, BufferMgr shouldn't be structs since there's 1 per db anyway
+
+12/31/22 SUMMARY--------
+Progress:
+- finished recpage and wrote tableScan as much as I could without ch 4/5 
+- made a FileMgr struct from ch 3 (which is probably good, even though it seems maybe too OOP?); fixed tests to work with that (+ fixed EOF error)
+- went back to ch 4 (memory management) and did LogMgr, with a decent amount of BufferMgr done as well 
+
+Struggled with: 
+- trying to do ch 6 without having ch 4/5 actually done 
+- pathname / directory creation stuff (for creating filemgr)
+- the append method for LogMgr hurt my head for a while 
+- really want to be able to return either struct or nil (or whatever falsy val) but can't, might have to just do errors everywhere? (might be able to just do nil pointers?)
+- int vs int64 conversions are annoying 
+
+Questions:
+- how do I have test functions (like you'd put in the main() in a java program) that don't run unless I specify (but I can specify that, from cmd line)? 
+- Can I return either a falsy value or a struct in a given function? 
+- How does waiting / delay stuff work in Go? 
+- Is there a difference between creating a [4096]byte vs make([]byte, 4096) in usage / optimization, if I never add more to the slice than that capacity? (If not, can I pass an integer as a constant that can make an array of that size?)
+- If I have a [4096]byte, is that / how do I know that that's an actual single page from the OS? 
+- What is the sql interface in Go and how do I use it? 
+
+Todo: 
+- BufferMgr, waiting functionality 
+- BufferMgr, null vs buffer returning (also one in LogMgr too)
+- WRITE TESTS for memmgr.go 
+- update version of Go 
+- actually open the simpledb code 
+- read ch 5 carefully
+
+Parking lot: 
+- comment EVERYTHING way more 
+- way more error checking 
+- improve tests
+- things to check out: os Sync, syscallconn; io 
+- figure out how perms for creating files work
+- optimize ch 6 stuff (e.g. spanned records, variable length, etc)
+- go back and figure out the string stuff for ch 3
+- consider un-struct-ing BufferMgr, LogMgr, FileMgr
+- write tests for ch 6 stuff
+- make sure that writeBlock actually fully overwrites whatever was on the page previously
+- use arrays instead of slices? perhaps? 
+- optimize ch 4/5 stuff (only AFTER basics are done tho)
+- think about returning vs updating the thing passed in (since returning is probably by value) (but slices are passed by reference!)
+
+bedtime now, more tomorrow! (1:10am, 1/1/23!!)
+(or I could stay up looking at the 245 stuff for another 45 minutes) (sigh)
+nov 16-21 is NOT gone through (stopped at topic 9, nov 7-14, and some of that is open but not looked through either (struct size, pointers tree, sizeof / array slice size allocations))
+
+
+1/1/2023 1:15pm
+Starting with making tests for logMgr
+added get/set string to pages (NEED TO TEST) 
+I still don't really understand the maxLength thing for strings on pages - I guess it's basically for different charset encodings. For now leave as is and assume all are ascii (thus all strings must be same length)?
+pointers sigh
