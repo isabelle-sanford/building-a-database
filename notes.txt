@@ -289,3 +289,11 @@ arraylists can do both of these (the .remove() function exists), but slices in g
 Could make a pins map (v duplicated)
 Could combine pins and buffers - is that a good idea? 
 going with pins map, whatever
+
+6:45
+okay ACTUALLY finished all the pre-test debugging now. food time. 
+
+8:45 came back from dinner (in which I read the Go book chapter 1, because of course) and wrote and tested tests! 
+
+10:15
+Tests completed and work, insofar as they do what they're supposed to. Both recovery and concurrency are not implemented at all, and probably won't be for a while (though recovery is doable / would be nice so the log file is useful)

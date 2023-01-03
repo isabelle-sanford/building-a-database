@@ -70,9 +70,13 @@ func makeTransaction(fm *FileMgr, lm *LogMgr, bm *BufferMgr) *Transaction {
 	return &Transaction{getNextTxNum(), bm, fm, *makeBufferList(bm)}
 }
 
-func (tx Transaction) commit() {}
-// func (tx Transaction) rollback() {}
-// func (tx Transaction) recover() {}
+// dummies for now
+func (tx Transaction) commit() {
+	tx.bm.flushAll(tx.txnum)
+	//tx.lm.flushAll()
+}
+func (tx Transaction) rollback() {} // does nothing
+func (tx Transaction) recover() {}
 
 func (tx Transaction) pin(blk BlockId) {
 	tx.bufflist.pin(blk)
@@ -122,19 +126,66 @@ func (tx Transaction) append(filename string) BlockId {
 
 // txTest
 func main() {
-	bufferTest()
-	bufferMgrTest()
+	// setup (need to simplify...)
+	vfm := makeFileMgr("mydb", 400)
+	fm := &vfm
+	vlm := makeLogMgr(fm, "log")
+	lm := &vlm
+	vbm := makeBufferManager(fm, lm, 8)
+	bm := &vbm
 
-	// vfm := makeFileMgr("mydb", 400)
-	// fm := &vfm
-	// vlm := makeLogMgr(fm, "log")
-	// lm := &vlm
-	// vbm := makeBufferManager(fm, lm, 8)
-	// bm := &vbm
+	p := makePage(fm.blocksize)
 
 
+	tx1 := makeTransaction(fm, lm, bm)
+	blk := fm.makeBlock("testtx", 1) // does text index blocks from 1?
+	tx1.pin(blk)
 
-	// tx1 := makeTransaction(fm, lm, bm)
+	tx1.setInt(blk, 80, 1, false)
+	tx1.setString(blk, 40, "one", false)
+	tx1.commit() 
+
+	//fmt.Printf("Buffers after tx1: %v\n", *bm.bufferpool[0])
+
+	tx2 := makeTransaction(fm, lm, bm)
+	tx2.pin(blk)
+	ival := tx2.getInt(blk, 80)
+	sval := tx2.getString(blk, 40)
+	fmt.Printf("Initial value at location 80 = %d\nInitial value at location 40 = %s\n", ival, sval)
+	newival := ival + 1 // 2
+	newsval := sval + "!" // one!
+	tx2.setInt(blk, 80, newival, true)
+	tx2.setString(blk, 40, newsval, true)
+
+	ival = tx2.getInt(blk, 80)
+	sval = tx2.getString(blk, 40)
+	fmt.Printf("after set/before commit at location 80 = %d\nat location 40 = %s\n", ival, sval)
+	tx2.commit() // flushes (but changes don't wait til here to propagate)
+
+	//fmt.Printf("Buffers after tx2: %v\n", *bm.bufferpool[0])
+	fmt.Printf("tx2 after completion: %v\n", tx2)
+
+
+	tx3 := makeTransaction(fm, lm, bm)
+	tx3.pin(blk)
+	fm.readBlock(blk, p)
+	fmt.Printf("block start of tx3 %v\n", p)
+	iival := tx3.getInt(blk, 80)
+	ssval := tx3.getString(blk, 40)
+	fmt.Printf(
+		"start tx3 value at location 80 = %d\ntx3 value at location 40 = %s\n", iival, ssval)
+	tx3.setInt(blk, 80, 9999, true)
+	fmt.Printf("pre-rollback value at loc 80: %v\n", tx3.getInt(blk, 80))
+	tx3.rollback() // does not work 
+
+	//fmt.Printf("buffers after tx3: %v\n", *bm.bufferpool[0])
+
+	tx4 := makeTransaction(fm, lm, bm) 
+	tx4.pin(blk)
+	fmt.Printf("post-rollback at location 80 = %d\n", tx4.getInt(blk, 80))
+	tx4.commit()
+
+	//fmt.Printf("Buffers after tx4: %v\n", *bm.bufferpool[0])
 }
 
 

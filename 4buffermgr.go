@@ -36,7 +36,7 @@ func makeBufferManager(fm *FileMgr, lm *LogMgr, numbuffs int) BufferMgr {
 }
 
 func (bm *BufferMgr) pin(blk BlockId) (*Buffer, error) {
-	fmt.Printf("Trying to pin block %v... ", blk)
+	//fmt.Printf("Trying to pin block %v... ", blk)
 	b, err := bm.tryToPin(blk)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func (bm *BufferMgr) pin(blk BlockId) (*Buffer, error) {
 		return nil, err
 	}
 
-	fmt.Print("Success!\n")
+	//fmt.Print("Success!\n")
 
 	return b, nil
 }
@@ -149,6 +149,8 @@ func (bf *Buffer) setModified(txnum int, lsn int) {
 func (bf *Buffer) flush() {
 	if bf.txnum >= 0 {
 		bf.lm.flushLSN(bf.lsn)
+
+		// check if block was modified? 
 		worked := bf.fm.writeBlock(bf.blk, bf.pg)
 		bf.txnum = -1 
 		
