@@ -190,10 +190,10 @@ Questions:
 - What is the sql interface in Go and how do I use it? 
 
 Todo: 
-- BufferMgr, waiting functionality 
-- BufferMgr, null vs buffer returning (also one in LogMgr too)
-- WRITE TESTS for memmgr.go 
-- update version of Go 
+X BufferMgr, waiting functionality 
+X BufferMgr, null vs buffer returning (also one in LogMgr too)
+X WRITE TESTS for memmgr.go 
+X update version of Go 
 - actually open the simpledb code 
 - read ch 5 carefully
 
@@ -204,7 +204,7 @@ Parking lot:
 - things to check out: os Sync, syscallconn; io 
 - figure out how perms for creating files work
 - optimize ch 6 stuff (e.g. spanned records, variable length, etc)
-- go back and figure out the string stuff for ch 3
+X go back and figure out the string stuff for ch 3
 - consider un-struct-ing BufferMgr, LogMgr, FileMgr
 - write tests for ch 6 stuff
 - make sure that writeBlock actually fully overwrites whatever was on the page previously
@@ -259,3 +259,33 @@ adding defer keywords to file closings
 making blockId constructor (that actually adds a new block at the end if you need to extend the file)
 
 3pm BufferMgr tests appear to work!! (And so do the Buffer tests!) ALSO I GOT THE TEXTBOOK!!
+I think that means chapter 4 is done???
+Okay the 'wait' method isn't with concurrency like it should be 
+so ch 4 todo:
+- do threading / concurrency for chooseUnpinnedBuffer() waiting on unpinned buffers by checking after something is unpinned, not just every X seconds 
+- change chooseUnpinnedBuffer strategy to the clock one (i.e. start looking at the buffer directly after the most currently used instead of at the beginning)
+- add better test prints / have a testing flag / maybe just have better tests in general 
+- check on pointer things (more)
+- comments
+
+end of ch 4 problems notes: 
+- 4.4 / 4.15 suggests looking for an unmodified buffer over a modified one when pinning something new. Disadvantage is you might have to read the old one again (and that's potentially more likely than having to read an already-modified block that just needs to be written back), BUT advantage is that you don't actually have to do a write to the disk! Which seems worth it? 
+- 4.11 (use buffer for the logPage), 4.12 (use buffer to hold the next() pages in iterator), 4.17 (make the pool a different data structure(s) to allow easier searching through buffers), and maybe 4.18 (make a way for BM to print usage statistics) seem good 
+
+5:15 finished reading ch 5
+Conclusion: unlike last chapter, this one actually would be relatively easy to come back later and fill in, so long as I have a Transaction object. I might do the recovery part but DEFINITELY not the concurrency yet. no thank you. 
+starting with making BufferList and I just realized that anonymous structs would be really nice here because I wouldn't have to do like bl.bm.lm or anything but could just do bl.thefunc - todo, but later
+also possibly pick something different for constructors, maybe newWhatever
+Noticing again that setInt vs setString seem to be... very duplicating each other 
+6:00 done with writing out Transaction & BufferList classes without including any recovery / concurrency. now to test
+should there be a db object? ... okay yes almost definitely. do that later (but soonish)
+maybe haven't had as many passing problems as expected because slices are pointers? 
+look at p 86-87 of go book, and consider equality things (prooobably okay generally because we actually want to be passing pointers?)
+
+okay so the pins list in BufferList is giving me some trouble - it's a list where each item is a buffer that is pinned, and if you pin again you add a duplicate to the list 
+I need to be able to:
+- look whether a particular buffer exists AND remove it (once)
+arraylists can do both of these (the .remove() function exists), but slices in go would have to loop through to find if something exists and return the index (which is doable), OR maps in go can find existence, but removing exactly one each time is a little more of a pain
+Could make a pins map (v duplicated)
+Could combine pins and buffers - is that a good idea? 
+going with pins map, whatever

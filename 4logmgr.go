@@ -5,7 +5,7 @@ import "fmt"
 // note: first byte in logPage is integer specifying
 // loc of end of last record
 type LogMgr struct {
-	fm FileMgr // 
+	fm *FileMgr // 
 	logfile string // filename of log file
 	currlsn int
 	currblock BlockId
@@ -19,7 +19,7 @@ type LogMgr struct {
 
 // LOG MANAGER----------
 // could just get blocksize from fm? 
-func makeLogMgr(fm FileMgr, logfile string) LogMgr {
+func makeLogMgr(fm *FileMgr, logfile string) LogMgr {
 	logsize := fm.openFiles[logfile]
 	currBlock := BlockId{logfile, logsize - 1} // 0?
 	lgpage := makePage(fm.blocksize)
@@ -122,7 +122,7 @@ func (lm *LogMgr) flush() {
 
 func testLogMgr() {
 	fm := makeFileMgr("mydb", 80)
-	lm := makeLogMgr(fm, "logfile")
+	lm := makeLogMgr(&fm, "logfile")
 
 	printLogRecords := func (msg string) {
 		fmt.Println(msg)
@@ -166,6 +166,9 @@ func testLogMgr() {
 	createRecords(36, 70)
 	lm.flushLSN(65)
 	printLogRecords("\nThe log file now has these records: ")
+
+
+	fmt.Println("LogMgr testing complete")
 }
 
 

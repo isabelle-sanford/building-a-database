@@ -25,14 +25,14 @@ type Buffer struct {
 }
 
 // BUFFER MANAGER------------
-func makeBufferManager(fm *FileMgr, lm *LogMgr, numbuffs int) *BufferMgr {
+func makeBufferManager(fm *FileMgr, lm *LogMgr, numbuffs int) BufferMgr {
 	pool := make([]*Buffer, numbuffs)
 
 	for i := 0; i < len(pool); i++ {
 		pool[i] = makeBuffer(fm, lm)
 	}
 
-	return &BufferMgr{fm, lm, numbuffs, pool, numbuffs}
+	return BufferMgr{fm, lm, numbuffs, pool, numbuffs}
 }
 
 func (bm *BufferMgr) pin(blk BlockId) (*Buffer, error) {
@@ -71,12 +71,13 @@ func (bm *BufferMgr) flushAll(txnum int) {
 func (bm *BufferMgr) tryToPin(blk BlockId) (*Buffer, error) {
 	b := bm.findExistingBuffer(blk)
 
+	// ? could put all of this timing stuff inside chooseUnpinned?
 	if b == nil {
 		//fmt.Println("Did not find existing buffer holding block")
 		b = bm.chooseUnpinnedBuffer()
 
 		if b == nil {
-			timeout := time.Minute / 3
+			timeout := time.Minute / 6
 			deadline := time.Now().Add(timeout)
 			for tries := 0; time.Now().Before(deadline); tries++ {
 				b = bm.chooseUnpinnedBuffer()
@@ -84,7 +85,7 @@ func (bm *BufferMgr) tryToPin(blk BlockId) (*Buffer, error) {
 					return b, nil
 				}
 				log.Printf("\nAll buffers in use; retrying in 10 seconds...")
-				time.Sleep(time.Second * 10) // every 10 seconds
+				time.Sleep(time.Second * 3) // every 10 seconds
 			}
 	
 			// todo consider panicking here rather than just returning err
@@ -181,7 +182,7 @@ func (bf *Buffer) unpin() {
 
 func bufferTest() {
 	fm := makeFileMgr("mydb", 80)
-	lm := makeLogMgr(fm, "logfile")
+	lm := makeLogMgr(&fm, "logfile")
 	bm := makeBufferManager(&fm, &lm, 3)
 
 	fmt.Println("managers made...")
@@ -226,12 +227,14 @@ func bufferTest() {
 	fmt.Println(bm.bufferpool[2])
 	fmt.Println(buff0)
 
+	fmt.Println("Buffer testing complete\n")
+
 }
 
 func bufferMgrTest() { // buffer manager test 
 
 	fm := makeFileMgr("mydb", 80)
-	lm := makeLogMgr(fm, "logfile")
+	lm := makeLogMgr(&fm, "logfile")
 	bm := makeBufferManager(&fm, &lm, 3)
 
 	var buff [6]*Buffer
@@ -261,5 +264,7 @@ func bufferMgrTest() { // buffer manager test
 			fmt.Printf("Buff[%d] pinned to block %v\n", i, *bb)
 		}
 	}
+
+	fmt.Println("BufferMgr testing complete")
 
 }

@@ -189,6 +189,6 @@ func testFileMgr() {
 	fm.readBlock(b2, p0)
 	fmt.Println("block 2 post write: ", p0)
 
-
+	fmt.Println("FileMgr testing complete")
 
 }
