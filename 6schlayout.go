@@ -1,4 +1,4 @@
-package mydb
+package main
 
 // imports
 
@@ -11,20 +11,23 @@ type Schema struct {
 }
 
 type FieldInfo struct {
-	fldtype int 
-	length int
+	fldtype int
+	length  int
 }
 
 type Layout struct {
-	schema Schema
-	offsets map[string]int 
+	schema   Schema
+	offsets  map[string]int
 	slotsize int
 }
 
 // SCHEMA
+func makeSchema() Schema {
+	return Schema{make(map[string]FieldInfo)}
+}
 
 func (s Schema) addField(fldname string, fldtype int, length int) {
-	s.fields[fldname] = FieldInfo{fldtype,length}
+	s.fields[fldname] = FieldInfo{fldtype, length}
 }
 
 func (s Schema) addIntField(fldname string) {
@@ -60,17 +63,15 @@ func (s Schema) hasField(fldname string) bool {
 	return ok
 }
 
-
-
 // LAYOUTS
 func makeLayoutFromSchema(sch Schema) Layout {
 	offsets := make(map[string]int)
 	pos := INTBYTES // hmm (could be 1? idk)
 	for f := range sch.fields {
-		offsets[f] = pos 
+		offsets[f] = pos
 		pos += sch.lengthInBytes(f)
-	} 
-	slotsize := pos 
+	}
+	slotsize := pos
 	var l = Layout{sch, offsets, slotsize}
 
 	return l
@@ -82,14 +83,11 @@ func makeLayout(sch Schema, offsets map[string]int, slotsize int) Layout {
 	return l
 }
 
-
-
-
 func (sch Schema) lengthInBytes(fldname string) int {
 	fldtype := sch.fldtype(fldname)
-	if (fldtype == INTEGER) {
+	if fldtype == INTEGER {
 		return INTBYTES
 	} else { // i.e. fldtype == VARCHAR
-		return sch.length(fldname) // hmmmmm 
+		return sch.length(fldname) // hmmmmm
 	}
 }

@@ -125,7 +125,7 @@ func (tx Transaction) append(filename string) BlockId {
 } // ?
 
 // txTest
-func main() {
+func txTest() {
 	// setup (need to simplify...)
 	vfm := makeFileMgr("mydb", 400)
 	fm := &vfm

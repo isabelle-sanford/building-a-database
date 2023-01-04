@@ -7,7 +7,7 @@ import (
 
 // is blocksize in bytes or bits?
 const BLOCKSIZE int = 64 //! temporary for ease of testing // os.Getpagesize()
-const INTSIZE int = 8 //strconv.IntSize
+const INTSIZE int = 8    //strconv.IntSize
 
 // slice instead of array for now because write is unhappy >:(
 type Page struct {
@@ -15,9 +15,20 @@ type Page struct {
 	//buffer bytes.Buffer
 }
 
+func (p *Page) String() string {
+	// todo make actual Builder later (& maybe better?)
+
+	var s string
+	for i := 0; i < len(p.contents); i += 8 {
+		s += fmt.Sprint(p.contents[i:i+8], "\n")
+	}
+
+	return s
+}
+
 // for data pages
 func makePage(blocksize int) (p *Page) {
-	var b []byte = make([]byte, blocksize)// temp replacement for blocksize
+	var b []byte = make([]byte, blocksize) // temp replacement for blocksize
 	//bb := bytes.NewBuffer(b)
 	p = &Page{b} //, *bb}
 	return
@@ -30,11 +41,11 @@ func makeLogPage(b []byte) *Page {
 func (p *Page) getInt(offset int) int64 {
 	var b int64
 
-	offsetLoc := p.contents[offset:offset + INTSIZE]
+	offsetLoc := p.contents[offset : offset+INTSIZE]
 
 	//fmt.Printf("Pre-decoding binary: %x\n", offsetLoc)
 
-	b,_ = binary.Varint(offsetLoc)
+	b, _ = binary.Varint(offsetLoc)
 
 	// error handling
 
@@ -43,17 +54,16 @@ func (p *Page) getInt(offset int) int64 {
 
 func (p *Page) setInt(offset int, value int64) {
 	inBytes2 := make([]byte, INTSIZE)
-	//var inBytes []byte 
+	//var inBytes []byte
 	n := binary.PutVarint(inBytes2, value)
-
 
 	//fmt.Printf("Translation is: %d or %v\n", inBytes2[0:3], inBytes2)
 
 	for i := 0; i < int(INTSIZE); i++ {
 		if i >= n {
-			p.contents[offset + i] = byte(0)
+			p.contents[offset+i] = byte(0)
 		} else {
-			p.contents[offset + i] = inBytes2[i]
+			p.contents[offset+i] = inBytes2[i]
 		}
 	}
 
@@ -64,14 +74,14 @@ func (p *Page) getBytes(offset int) []byte {
 	//fmt.Printf("Trying to get bytes at %d\n", offset)
 	len := p.getInt(offset)
 
-	toret := p.contents[offset + INTSIZE:offset + INTSIZE + int(len)]
+	toret := p.contents[offset+INTSIZE : offset+INTSIZE+int(len)]
 
 	return toret
 }
 
 func (p *Page) setBytes(offset int, b []byte) {
 	//fmt.Printf("Inserting bytes %v...\n", b)
-	
+
 	len := len(b)
 
 	//fmt.Printf("Byte conversion of string (cap %d) is %v\n", len, b)
@@ -81,7 +91,7 @@ func (p *Page) setBytes(offset int, b []byte) {
 	start := offset + INTSIZE //+ len
 
 	for i := 0; i < len; i++ {
-		p.contents[start + i] = b[i]
+		p.contents[start+i] = b[i]
 	}
 
 	//fmt.Printf("at %d, contents %v\n",start, p.contents)
@@ -93,7 +103,6 @@ func (p *Page) getString(offset int) string {
 }
 
 func (p *Page) setString(offset int, val string) {
-	
 
 	b := []byte(val)
 
@@ -103,7 +112,6 @@ func (p *Page) setString(offset int, val string) {
 
 	p.setBytes(offset, b)
 }
-
 
 func testPage() {
 	var test int64 = 1029388
@@ -119,7 +127,6 @@ func testPage() {
 
 	//etcint := p.getInt(0)
 
-	
 	fmt.Println(retint)
 	//fmt.Println(etcint)
 

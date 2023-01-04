@@ -297,3 +297,10 @@ okay ACTUALLY finished all the pre-test debugging now. food time.
 
 10:15
 Tests completed and work, insofar as they do what they're supposed to. Both recovery and concurrency are not implemented at all, and probably won't be for a while (though recovery is doable / would be nice so the log file is useful)
+
+1/3/23 9:15pm 
+Did a bit of work earlier copying record page test from book, now actually trying to test that and make it work. Schema/Layout is good as far as I can tell. 
+Consider putting all types in a separate 'definitions' file so I can remember them easier? 
+Question - should I be leaving the first 8 bytes of a block for the buffer/etc managers to use and preclude records? How should I do that / why is it not happening already (something about Java?)
+stopping 9:55 for val
+Did I ever deal with the thing about offset? 
