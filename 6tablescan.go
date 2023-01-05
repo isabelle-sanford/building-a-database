@@ -24,16 +24,20 @@ func makeTableScan(tx *Transaction, tblname string, layout Layout) TableScan {
 	filename := tblname + ".tbl"
 
 	// might be immediately overwritten by the moveToNewBlock()
-	rp := makeRecordPage(tx, BlockId{filename, 0}, layout)
+	//rp := makeRecordPage(tx, BlockId{filename, -1}, layout)
 
-	t := TableScan{tx, tblname, layout, &rp, filename, 0}
+	newblk := tx.append(filename)
+	rp := makeRecordPage(tx, newblk, layout)
+	rp.format()
+	t := TableScan{tx, tblname, layout, &rp, filename, -1}
 
 	// fmt.Println(t)
-	if tx.fm.openFiles[filename] > 0 {
-		t.moveToBlock(0)
-	} else {
-		t.moveToNewBlock()
-	}
+	// if tx.fm.openFiles[filename] > 0 {
+	// 	fmt.Println("file already has stuff in it!")
+	// 	t.moveToBlock(0)
+	// } else {
+	//t.moveToNewBlock()
+	//}
 
 	return t
 }
@@ -55,7 +59,7 @@ func (t *TableScan) next() bool {
 		if t.atLastBlock() {
 			return false
 		}
-		t.moveToNextBlock()
+		t.moveToBlock(t.rp.blk.blknum + 1)
 		nextslot = t.rp.nextAfter(nextslot)
 	}
 	t.currslot = nextslot
@@ -72,12 +76,20 @@ func (t *TableScan) moveToRid(r RID) {
 }
 
 func (t *TableScan) insert() {
+	//fmt.Println("Looking at currblock ", t.rp.blk)
 	newslot := t.rp.insertAfter(t.currslot)
+	//fmt.Println("Next slot from insertAfter is ", newslot)
 	for newslot < 0 {
-		t.moveToNextBlock()
+		if t.atLastBlock() {
+			t.moveToNewBlock()
+		} else {
+			t.moveToBlock(t.rp.blk.blknum + 1)
+		}
+
 		// loop, etc, append block if all full, change currRID.blknum accordingly
 		newslot = t.rp.insertAfter(t.currslot)
 	}
+	//fmt.Println("Setting currslot to ", newslot)
 
 	t.currslot = newslot
 }
@@ -109,17 +121,17 @@ func (t *TableScan) delete() {
 // aux
 
 // having this isn't strictly needed(?), could just do moveToBlock() and calculate blknum up above
-func (t *TableScan) moveToNextBlock() {
-	t.close()
+// func (t *TableScan) moveToNextBlock() {
+// 	t.close()
 
-	if t.atLastBlock() {
-		t.moveToNewBlock()
-	} else {
-		newblknum := t.rp.blk.blknum + 1
-		t.moveToBlock(newblknum)
-	}
+// 	if t.atLastBlock() {
+// 		t.moveToNewBlock()
+// 	} else {
+// 		newblknum := t.rp.blk.blknum + 1
+// 		t.moveToBlock(newblknum)
+// 	}
 
-}
+// }
 
 func (t *TableScan) moveToNewBlock() {
 	t.close()
@@ -153,18 +165,18 @@ func (t *TableScan) atLastBlock() bool {
 
 // tableScanTest
 func main() {
-	vfm := makeFileMgr("mydb", 400)
+	vfm := makeFileMgr("mydb", 104)
 	fm := &vfm
 	vlm := makeLogMgr(fm, "log")
 	lm := &vlm
-	vbm := makeBufferManager(fm, lm, 8)
+	vbm := makeBufferManager(fm, lm, 9)
 	bm := &vbm
 
 	tx := makeTransaction(fm, lm, bm)
 	var sch Schema = makeSchema()
 
 	sch.addIntField("A")
-	sch.addStringField("B", 9)
+	sch.addStringField("B", 10)
 	layout := makeLayoutFromSchema(sch)
 	for fldname := range layout.schema.fields {
 		offset := layout.offsets[fldname]
@@ -172,39 +184,43 @@ func main() {
 	}
 	fmt.Printf("Total slot size is %d\n", layout.slotsize)
 
-	ts := makeTableScan(tx, "NewT", layout) // !
+	ts := makeTableScan(tx, "NewT", layout)
+
+	fmt.Println(ts.rp.tx.bufflist.buffers[BlockId{"NewT.tbl", 0}].pg)
 
 	fmt.Println("Filling the page with random records.")
 	ts.beforeFirst()
-	for i := 0; i < 25; i++ {
-		ts.insert()
+	for i := 0; i < 4; i++ {
+		ts.insert() // !
 		n := rand.Intn(50)
 		ts.setInt("A", n)
 		ts.setString("B", fmt.Sprint("rec", n))
 		fmt.Printf("Inserting into slot %v: {%d, %s%d}\n", ts.currentRID(), n, "rec", n)
 	}
 
-	fmt.Println("Deleting these records with A values < 25.")
-	count := 0
-	ts.beforeFirst()
-	for ts.next() {
-		a := ts.getInt("A")
-		b := ts.getString("B")
-		if a < 25 {
-			count++
-			fmt.Printf("Slot %v: {%d, %s}\n", ts.currentRID(), a, b)
-			ts.delete()
-		}
-	}
+	fmt.Println(ts.rp.tx.bufflist.buffers[BlockId{"NewT.tbl", 0}].pg)
 
-	fmt.Printf("%d values under 25 were deleted.\n", count)
-	fmt.Println("Here are the remining records.")
-	ts.beforeFirst()
-	for ts.next() {
-		a := ts.getInt("A")
-		b := ts.getString("B")
-		fmt.Printf("Slot %v: {%d, %s}\n", ts.currentRID(), a, b)
-	}
+	// fmt.Println("Deleting these records with A values < 25.")
+	// count := 0
+	// ts.beforeFirst()
+	// for ts.next() {
+	// 	a := ts.getInt("A")
+	// 	b := ts.getString("B")
+	// 	if a < 25 {
+	// 		count++
+	// 		fmt.Printf("Slot %v: {%d, %s}\n", ts.currentRID(), a, b)
+	// 		ts.delete()
+	// 	}
+	// }
+
+	// fmt.Printf("%d values under 25 were deleted.\n", count)
+	// fmt.Println("Here are the remining records.")
+	// ts.beforeFirst()
+	// for ts.next() {
+	// 	a := ts.getInt("A")
+	// 	b := ts.getString("B")
+	// 	fmt.Printf("Slot %v: {%d, %s}\n", ts.currentRID(), a, b)
+	// }
 
 	ts.close()
 	tx.commit()

@@ -11,8 +11,8 @@ type RecordPage struct {
 	layout Layout
 }
 
-const EMPTY int = 0
-const USED int = 1
+const EMPTY int = 1
+const USED int = 2
 
 // ? consider returning *RecordPage
 func makeRecordPage(tx *Transaction, blk BlockId, layout Layout) RecordPage {
@@ -60,6 +60,7 @@ func (rp *RecordPage) format() {
 		}
 		slot++
 	}
+	//fmt.Println("RP just post-formatting: ", rp.tx.bufflist.buffers[rp.blk].pg)
 }
 
 // finds next used slot after @param slot
@@ -68,7 +69,9 @@ func (rp *RecordPage) nextAfter(slot int) int {
 }
 
 func (rp *RecordPage) insertAfter(slot int) int {
+	//fmt.Println("RP at start of insertAfter: ", rp.tx.bufflist.buffers[rp.blk].pg)
 	newslot := rp.searchAfter(slot, EMPTY)
+	//fmt.Println("insertAfter gets from searchAfter: \n", newslot)
 	if newslot >= 0 {
 		rp.setFlag(newslot, USED)
 	}
@@ -82,12 +85,16 @@ func (rp *RecordPage) setFlag(slot int, flag int) {
 }
 
 func (rp *RecordPage) searchAfter(slot int, flag int) int {
-	slot++
-	for rp.isValidSlot(slot) {
-		if rp.tx.getInt(rp.blk, rp.offset(slot)) == flag {
-			return slot
+	sslot := slot + 1
+	//fmt.Println("searchAfter checks whether this slot is valid: ", sslot)
+	for rp.isValidSlot(sslot) {
+		fmt.Printf("Slot is valid! Checking flag at block %v offset %d: %d \n", rp.blk, rp.offset(sslot), rp.tx.getInt(rp.blk, rp.offset(sslot)))
+
+		if rp.tx.getInt(rp.blk, rp.offset(sslot)) == flag {
+			//fmt.Println("Slot is unused: ", sslot)
+			return sslot
 		}
-		slot++
+		sslot++
 	}
 	return -1
 }
