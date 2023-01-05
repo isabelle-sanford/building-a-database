@@ -182,7 +182,9 @@ func (bf *Buffer) pin() {
 	bf.pins++
 }
 func (bf *Buffer) unpin() {
-	bf.pins--
+	if bf.pins > 0 {
+		bf.pins--
+	}
 }
 
 func bufferTest() {

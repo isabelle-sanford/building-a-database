@@ -29,8 +29,12 @@ func makeTableScan(tx *Transaction, tblname string, layout Layout) TableScan {
 	t := TableScan{tx, tblname, layout, &rp, filename, 0}
 
 	// fmt.Println(t)
+	if tx.fm.openFiles[filename] > 0 {
+		t.moveToBlock(0)
+	} else {
+		t.moveToNewBlock()
+	}
 
-	t.moveToNewBlock()
 	return t
 }
 
@@ -110,10 +114,11 @@ func (t *TableScan) moveToNextBlock() {
 
 	if t.atLastBlock() {
 		t.moveToNewBlock()
+	} else {
+		newblknum := t.rp.blk.blknum + 1
+		t.moveToBlock(newblknum)
 	}
 
-	newblknum := t.rp.blk.blknum + 1
-	t.moveToBlock(newblknum)
 }
 
 func (t *TableScan) moveToNewBlock() {
@@ -125,12 +130,15 @@ func (t *TableScan) moveToNewBlock() {
 
 	t.rp = &newrp
 	t.currslot = -1
+
 }
 
 func (t *TableScan) moveToBlock(newblknum int) {
-	if newblknum == t.rp.blk.blknum {
-		return
-	}
+	// should newblknum be set into t somewhere here?
+
+	// if newblknum == t.rp.blk.blknum {
+	// 	return
+	// }
 
 	t.close()
 	rp := makeRecordPage(t.tx, BlockId{t.filename, newblknum}, t.layout)
@@ -168,7 +176,7 @@ func main() {
 
 	fmt.Println("Filling the page with random records.")
 	ts.beforeFirst()
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 25; i++ {
 		ts.insert()
 		n := rand.Intn(50)
 		ts.setInt("A", n)
