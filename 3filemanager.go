@@ -7,15 +7,15 @@ import (
 )
 
 type FileMgr struct {
-	dbDir string // might need to be pointer or os.File
-	isNew bool
+	dbDir     string // might need to be pointer or os.File
+	isNew     bool
 	openFiles map[string]int
 	blocksize int
 }
 
 type BlockId struct {
 	filename string
-	blknum int // index of location within file
+	blknum   int // index of location within file
 }
 
 // TODO TEST
@@ -27,21 +27,19 @@ func (fm *FileMgr) makeBlock(filename string, blknum int) BlockId {
 	bi := BlockId{filename, blknum}
 	for blknum >= fm.openFiles[filename] {
 		//fmt.Printf("That block does not exist yet!\n")
-		fm.appendNewBlock(filename) 
+		fm.appendNewBlock(filename)
 		p := makePage(fm.blocksize)
 		fm.writeBlock(bi, p)
 		//fmt.Printf("Making (new) block %v, currently containing %v\n", bi, p)
 	}
 
-	
-
 	return BlockId{filename, blknum}
 }
 
 func makeFileMgr(dbDir string, blocksize int) FileMgr {
-	_, err := os.Open(dbDir) // ! no // might need to close? 
+	_, err := os.Open(dbDir) // ! no // might need to close?
 	isNew := false
-	if errors.Is(err, os.ErrNotExist) { // when do you change from isNew? 
+	if errors.Is(err, os.ErrNotExist) { // when do you change from isNew?
 		isNew = true
 		os.MkdirAll(dbDir, 0777) // !! perms??
 	}
@@ -51,11 +49,11 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 
 	return FileMgr{dbDir, isNew, openFiles, blocksize}
 }
-func (fm *FileMgr) readBlock(blk BlockId, p *Page) (bool) {
+func (fm *FileMgr) readBlock(blk BlockId, p *Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
 
 	//var b []byte = make([]byte, BLOCKSIZE)
-	_, err := f.ReadAt(p.contents, int64(blk.blknum * fm.blocksize))
+	_, err := f.ReadAt(p.contents, int64(blk.blknum*fm.blocksize))
 
 	worked := true
 
@@ -74,7 +72,7 @@ func (fm *FileMgr) readBlock(blk BlockId, p *Page) (bool) {
 func (fm *FileMgr) writeBlock(blk BlockId, p *Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
 
-	_, err := f.WriteAt(p.contents, int64(fm.blocksize * blk.blknum))
+	_, err := f.WriteAt(p.contents, int64(fm.blocksize*blk.blknum))
 
 	worked := true
 
@@ -83,13 +81,12 @@ func (fm *FileMgr) writeBlock(blk BlockId, p *Page) bool {
 		worked = false
 	}
 
-
 	defer f.Close()
 	return worked
 }
 
 // PRIVATE TO FILE MANAGER
-// attach to file manager object? 
+// attach to file manager object?
 // return opened file, create first if it doesn't exist
 func (fm *FileMgr) getFile(filename string) *os.File { // might need pointer?
 	_, ok := fm.openFiles[filename]
@@ -98,7 +95,7 @@ func (fm *FileMgr) getFile(filename string) *os.File { // might need pointer?
 	//fmt.Println(path)
 
 	if ok { // filename is in files
-		f, err := os.OpenFile(path, os.O_RDWR,0666) // ! PERM STUFF
+		f, err := os.OpenFile(path, os.O_RDWR, 0666) // ! PERM STUFF
 
 		if err != nil {
 			fmt.Println("Failed to open file: ", err)
@@ -123,22 +120,19 @@ func (fm *FileMgr) appendNewBlock(filename string) BlockId {
 
 	var f *os.File = fm.getFile(filename)
 
-
-	newblknum := fm.openFiles[filename] 
-	blk := BlockId{filename,newblknum} 
+	newblknum := fm.openFiles[filename]
+	blk := BlockId{filename, newblknum}
 
 	fm.openFiles[filename]++
 
 	var b []byte = make([]byte, fm.blocksize) // ! using BLOCKSIZE does... something
 
-	f.WriteAt(b, int64(newblknum * fm.blocksize)) 
+	f.WriteAt(b, int64(newblknum*fm.blocksize))
 
-	f.Close()
-	
+	defer f.Close()
+
 	return blk
 }
-
-
 
 func testFileMgr() {
 	fm := makeFileMgr("mydb", 64)
@@ -166,7 +160,6 @@ func testFileMgr() {
 
 	fmt.Printf("FM files: %v\n", fm.openFiles)
 	fmt.Printf("Test page looks like: %v\n", p.contents)
-
 
 	fmt.Println("Writing test page to block 0")
 

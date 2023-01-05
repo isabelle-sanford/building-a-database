@@ -57,7 +57,7 @@ func (bm *BufferMgr) unpin(buff *Buffer) { // pointers...?
 	}
 }
 
-//func (bm *BufferMgr) available() int {} // probs unnecessary
+// func (bm *BufferMgr) available() int {} // probs unnecessary
 func (bm *BufferMgr) flushAll(txnum int) {
 	for _, buff := range bm.bufferpool { // don't need pointers here right?
 		if buff.txnum == txnum {
@@ -87,7 +87,7 @@ func (bm *BufferMgr) tryToPin(blk BlockId) (*Buffer, error) {
 				log.Printf("\nAll buffers in use; retrying in 10 seconds...")
 				time.Sleep(time.Second * 3) // every 10 seconds
 			}
-	
+
 			// todo consider panicking here rather than just returning err
 			return nil, fmt.Errorf("no buffer was found after %s\n", timeout)
 		}
@@ -150,10 +150,10 @@ func (bf *Buffer) flush() {
 	if bf.txnum >= 0 {
 		bf.lm.flushLSN(bf.lsn)
 
-		// check if block was modified? 
+		// check if block was modified?
 		worked := bf.fm.writeBlock(bf.blk, bf.pg)
-		bf.txnum = -1 
-		
+		bf.txnum = -1
+
 		if !worked {
 			fmt.Printf("Failed to flush a buffer with blockID %v and page %v", bf.blk, bf.pg)
 		}
@@ -168,7 +168,11 @@ func (bf *Buffer) assignToBlock(blk BlockId) {
 	ok := bf.fm.readBlock(blk, bf.pg)
 
 	if !ok {
-		fmt.Printf("Failed to read block %v into buffer %v\n", blk, bf)
+		bf.fm.makeBlock(blk.filename, blk.blknum) // ???
+		ok = bf.fm.readBlock(blk, bf.pg)
+		if !ok {
+			fmt.Printf("Failed to read block %v into buffer %v\n", blk, bf)
+		}
 	}
 
 	bf.pins = 0
@@ -180,7 +184,6 @@ func (bf *Buffer) pin() {
 func (bf *Buffer) unpin() {
 	bf.pins--
 }
-
 
 func bufferTest() {
 	fm := makeFileMgr("mydb", 80)
@@ -205,11 +208,11 @@ func bufferTest() {
 	fmt.Println("blocks written to...")
 	fmt.Printf("Files in filemanager: %v\n\nStarting pins...\n", fm.openFiles)
 
-	buff0,_ := bm.pin(b0) // !
+	buff0, _ := bm.pin(b0) // !
 	p0 := buff0.pg
 	n := p0.getInt(20)
 	p0.setInt(20, n+1)
-	buff0.setModified(1,0)
+	buff0.setModified(1, 0)
 	fmt.Printf("The new value in b1 is %d\n", n+1)
 	bm.unpin(buff0)
 
@@ -233,21 +236,21 @@ func bufferTest() {
 
 }
 
-func bufferMgrTest() { // buffer manager test 
+func bufferMgrTest() { // buffer manager test
 
 	fm := makeFileMgr("mydb", 80)
 	lm := makeLogMgr(&fm, "logfile")
 	bm := makeBufferManager(&fm, &lm, 3)
 
 	var buff [6]*Buffer
-	buff[0],_ = bm.pin(fm.makeBlock("bmtest", 0))
-	buff[1],_ = bm.pin(fm.makeBlock("bmtest", 1))
-	buff[2],_ = bm.pin(fm.makeBlock("bmtest", 2))
+	buff[0], _ = bm.pin(fm.makeBlock("bmtest", 0))
+	buff[1], _ = bm.pin(fm.makeBlock("bmtest", 1))
+	buff[2], _ = bm.pin(fm.makeBlock("bmtest", 2))
 	bm.unpin(buff[1])
-	buff[1] = nil 
+	buff[1] = nil
 
-	buff[3],_ = bm.pin(fm.makeBlock("bmtest", 0))
-	buff[4],_ = bm.pin(fm.makeBlock("bmtest", 1))
+	buff[3], _ = bm.pin(fm.makeBlock("bmtest", 0))
+	buff[4], _ = bm.pin(fm.makeBlock("bmtest", 1))
 
 	fmt.Printf("Available buffers: %v\n", bm.numavailable)
 
@@ -257,8 +260,8 @@ func bufferMgrTest() { // buffer manager test
 
 	fmt.Println("Unpinning buff2 and trying again")
 	bm.unpin(buff[2])
-	buff[2] = nil 
-	buff[5],_ = bm.pin(fm.makeBlock("bmtest", 3))
+	buff[2] = nil
+	buff[5], _ = bm.pin(fm.makeBlock("bmtest", 3))
 
 	fmt.Println("Final buffer allocation: ")
 	for i, bb := range buff {
