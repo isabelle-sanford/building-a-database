@@ -11,8 +11,8 @@ type RecordPage struct {
 	layout Layout
 }
 
-const EMPTY int = 1
-const USED int = 2
+const EMPTY int = 0
+const USED int = 1
 
 // ? consider returning *RecordPage
 func makeRecordPage(tx *Transaction, blk BlockId, layout Layout) RecordPage {
@@ -56,6 +56,10 @@ func (rp *RecordPage) format() {
 				rp.tx.setInt(rp.blk, fldpos, 0, false)
 			} else {
 				rp.tx.setString(rp.blk, fldpos, "", false)
+				// setting ALL bytes in string to 0
+				for i := 0; i < sch.fields[f].length; i++ {
+					rp.tx.setString(rp.blk, fldpos+i, "", false)
+				}
 			}
 		}
 		slot++
@@ -88,7 +92,7 @@ func (rp *RecordPage) searchAfter(slot int, flag int) int {
 	sslot := slot + 1
 	//fmt.Println("searchAfter checks whether this slot is valid: ", sslot)
 	for rp.isValidSlot(sslot) {
-		fmt.Printf("Slot is valid! Checking flag at block %v offset %d: %d \n", rp.blk, rp.offset(sslot), rp.tx.getInt(rp.blk, rp.offset(sslot)))
+		//fmt.Printf("Slot is valid! Checking flag at block %v offset %d: %d \n", rp.blk, rp.offset(sslot), rp.tx.getInt(rp.blk, rp.offset(sslot)))
 
 		if rp.tx.getInt(rp.blk, rp.offset(sslot)) == flag {
 			//fmt.Println("Slot is unused: ", sslot)

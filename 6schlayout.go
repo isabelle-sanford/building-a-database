@@ -88,6 +88,6 @@ func (sch Schema) lengthInBytes(fldname string) int {
 	if fldtype == INTEGER {
 		return INTBYTES
 	} else { // i.e. fldtype == VARCHAR
-		return sch.length(fldname) // hmmmmm
+		return sch.length(fldname) + INTBYTES // hmmmmm
 	}
 }

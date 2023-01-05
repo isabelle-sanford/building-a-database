@@ -314,3 +314,7 @@ I added a "make new block if you can't find the one you're trying to pin" condit
 
 4:15pm
 TableScanTest now works! Except that in addition to only entering records in even-numbered slots, it's also skipping even-numbered blocks! I.... do not know why. 
+I'd also still love to know why printing these bytes doubles every(?) value - at least every int value? e.g. if I set a particular byte to have the value 2, it will print as 4. 
+Problem appears to be that when it tries to create the table, it sees there's already a file with blocks in it, so it just goes to the first block to start reading - but the first block isn't actually formatted so it can't see that it's empty (tbf, will be better if/when I switch the EMPTY flag back to 0) and so doesn't get anything until it appends a new block. 
+Fix: Layout wasn't calculating offsets properly, because it wasn't taking into account the integer at the front of a string that says its length. Sigh. 
+I made some changes in the process of this that I am very much uncertain about, so that's fun. 
