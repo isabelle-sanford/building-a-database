@@ -188,4 +188,6 @@ func txTest() {
 	tx4.commit()
 
 	//fmt.Printf("Buffers after tx4: %v\n", *bm.bufferpool[0])
+
+	fmt.Println("Transaction testing complete.")
 }

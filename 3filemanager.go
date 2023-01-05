@@ -7,7 +7,7 @@ import (
 )
 
 type FileMgr struct {
-	dbDir     string // might need to be pointer or os.File
+	dbDir     string // might need to be pointer or os.File?
 	isNew     bool
 	openFiles map[string]int
 	blocksize int
@@ -19,23 +19,21 @@ type BlockId struct {
 }
 
 // TODO TEST
+// BlockId constructor (adds this block to file if it doesn't exist yet)
 func (fm *FileMgr) makeBlock(filename string, blknum int) BlockId {
-	// fmt.Printf("Running makeBlock(%s, %d)\n", filename, blknum)
-	// fmt.Println(fm.openFiles)
 	fm.getFile(filename) // making sure file is actually created
 	// (and thus in openFiles)
 	bi := BlockId{filename, blknum}
 	for blknum >= fm.openFiles[filename] {
-		//fmt.Printf("That block does not exist yet!\n")
 		fm.appendNewBlock(filename)
 		p := makePage(fm.blocksize)
 		fm.writeBlock(bi, p)
-		//fmt.Printf("Making (new) block %v, currently containing %v\n", bi, p)
 	}
 
-	return BlockId{filename, blknum}
+	return BlockId{filename, blknum} // kinda unnecessary?
 }
 
+// file manager constructor - maybe return pointer ?
 func makeFileMgr(dbDir string, blocksize int) FileMgr {
 	_, err := os.Open(dbDir) // ! no // might need to close?
 	isNew := false
@@ -49,33 +47,31 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 
 	return FileMgr{dbDir, isNew, openFiles, blocksize}
 }
+
+// read the contents of a given block and write them into page p
+// returns false if read fails (and prints error if so)
 func (fm *FileMgr) readBlock(blk BlockId, p *Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
-
-	//var b []byte = make([]byte, BLOCKSIZE)
 	_, err := f.ReadAt(p.contents, int64(blk.blknum*fm.blocksize))
 
+	// error handling (could be better)
 	worked := true
-
 	if err != nil {
 		fmt.Println("Failed to read block in file: ", blk, err)
 		worked = false
 	}
 
-	//fmt.Printf("Reading block %v (size %d) and returning %v\n", blk, n, p)
-
 	defer f.Close()
-	return worked // could maybe just return bool?
+	return worked
 }
 
 // write given page to block
 func (fm *FileMgr) writeBlock(blk BlockId, p *Page) bool {
 	var f *os.File = fm.getFile(blk.filename)
-
 	_, err := f.WriteAt(p.contents, int64(fm.blocksize*blk.blknum))
 
+	// error handling (could be better)
 	worked := true
-
 	if err != nil {
 		fmt.Println("Failed to write block to file: ", err)
 		worked = false
@@ -86,51 +82,41 @@ func (fm *FileMgr) writeBlock(blk BlockId, p *Page) bool {
 }
 
 // PRIVATE TO FILE MANAGER
-// attach to file manager object?
-// return opened file, create first if it doesn't exist
+// return pointer to opened file, create first if it doesn't exist
 func (fm *FileMgr) getFile(filename string) *os.File { // might need pointer?
 	_, ok := fm.openFiles[filename]
 
-	path := filename // fmt.Sprintf("../%s/%s", fm.dbDir, filename)
-	//fmt.Println(path)
+	path := filename // if files should actually be inside directory
 
 	if ok { // filename is in files
 		f, err := os.OpenFile(path, os.O_RDWR, 0666) // ! PERM STUFF
-
 		if err != nil {
 			fmt.Println("Failed to open file: ", err)
 		}
-
 		return f
-	} else {
+	} else { // must create first
 		dbTable, err := os.Create(path)
 		if err != nil {
 			fmt.Println("Failed to create file: ", err)
 			return nil
 		}
-
 		fm.openFiles[filename] = 0
 		return dbTable
 	}
-
 }
 
-// new empty block to the end of a file
+// add new empty block to the end of a file (and return its id)
 func (fm *FileMgr) appendNewBlock(filename string) BlockId {
-
 	var f *os.File = fm.getFile(filename)
-
 	newblknum := fm.openFiles[filename]
 	blk := BlockId{filename, newblknum}
-
 	fm.openFiles[filename]++
 
-	var b []byte = make([]byte, fm.blocksize) // ! using BLOCKSIZE does... something
-
+	// write empty slice to block to give it 0-values
+	var b []byte = make([]byte, fm.blocksize)
 	f.WriteAt(b, int64(newblknum*fm.blocksize))
 
 	defer f.Close()
-
 	return blk
 }
 
@@ -150,13 +136,7 @@ func testFileMgr() {
 	pp.setInt(0, 809)
 	pp.setString(30, "hello world")
 
-	// ! MUST use distinct pages for reading, else what's written to the page-to-read stays there even when you overwrite it with a different block to read
-	// I think
-	// not 100% sure
 	var p0 *Page = makePage(fm.blocksize)
-	// var p1 Page = makePage(fm.blocksize)
-	// var p2 Page = makePage(fm.blocksize)
-	// var p3 Page = makePage(fm.blocksize)
 
 	fmt.Printf("FM files: %v\n", fm.openFiles)
 	fmt.Printf("Test page looks like: %v\n", p.contents)

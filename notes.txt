@@ -317,4 +317,9 @@ TableScanTest now works! Except that in addition to only entering records in eve
 I'd also still love to know why printing these bytes doubles every(?) value - at least every int value? e.g. if I set a particular byte to have the value 2, it will print as 4. 
 Problem appears to be that when it tries to create the table, it sees there's already a file with blocks in it, so it just goes to the first block to start reading - but the first block isn't actually formatted so it can't see that it's empty (tbf, will be better if/when I switch the EMPTY flag back to 0) and so doesn't get anything until it appends a new block. 
 Fix: Layout wasn't calculating offsets properly, because it wasn't taking into account the integer at the front of a string that says its length. Sigh. 
-I made some changes in the process of this that I am very much uncertain about, so that's fun. 
+I made some changes in the process of this that I am very much uncertain about, so that's fun. The tablescan test does now work, which is good!! But- actually I can just go change that now, it's fine, I just didn't want to deal with pre-existing data before but all good now. (Also I'm not sure that was the problem after all? )
+
+6pm
+TableScan now actually works the way it's supposed to. Sometimes I could really skip a lot of work if I decided to follow what the textbook said in the first place rather than deeming it unnecessary. Sigh. 
+Todo: a bunch of commenting to explain what these functions do; cleaning out old comments and such; ch 7; more anonymous structing (might want to do a separate branch for that)
+7pm: commented / cleaned (somewhat) for ch 3 and 4 files

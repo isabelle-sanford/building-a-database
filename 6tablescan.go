@@ -142,7 +142,7 @@ func (t *TableScan) atLastBlock() bool {
 }
 
 // tableScanTest
-func main() {
+func tableScanTest() {
 	vfm := makeFileMgr("mydb", 400)
 	fm := &vfm
 	vlm := makeLogMgr(fm, "log")

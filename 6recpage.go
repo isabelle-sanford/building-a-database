@@ -180,4 +180,6 @@ func recordTest() {
 
 	tx1.unpin(blk)
 	tx1.commit()
+
+	fmt.Print("Record page testing complete.\n\n")
 }

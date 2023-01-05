@@ -18,16 +18,16 @@ type Buffer struct {
 	fm    *FileMgr // ??
 	lm    *LogMgr  // ??
 	blk   BlockId
-	pg    *Page // probably? buffers should DEF always be pointed to
+	pg    *Page
 	pins  int
-	txnum int // can you do default vals for structs? (that aren't just 0)
+	txnum int
 	lsn   int
 }
 
 // BUFFER MANAGER------------
+// buffer manager constructor
 func makeBufferManager(fm *FileMgr, lm *LogMgr, numbuffs int) BufferMgr {
 	pool := make([]*Buffer, numbuffs)
-
 	for i := 0; i < len(pool); i++ {
 		pool[i] = makeBuffer(fm, lm)
 	}
@@ -35,49 +35,48 @@ func makeBufferManager(fm *FileMgr, lm *LogMgr, numbuffs int) BufferMgr {
 	return BufferMgr{fm, lm, numbuffs, pool, numbuffs}
 }
 
+// pin a block to the buffer pool (if possible)
 func (bm *BufferMgr) pin(blk BlockId) (*Buffer, error) {
-	//fmt.Printf("Trying to pin block %v... ", blk)
 	b, err := bm.tryToPin(blk)
-
 	if err != nil {
 		fmt.Println("No buffers available currently. Try again later.")
 		return nil, err
 	}
-
-	//fmt.Print("Success!\n")
-
 	return b, nil
 }
-func (bm *BufferMgr) unpin(buff *Buffer) { // pointers...?
+
+// unpin a particular buffer page
+func (bm *BufferMgr) unpin(buff *Buffer) {
 	buff.unpin()
 
 	if !buff.isPinned() {
 		bm.numavailable++
-		//! notifyAll()
+		// todo notifyAll()
 	}
 }
 
-// func (bm *BufferMgr) available() int {} // probs unnecessary
+// flush all buffers with transaction number @txnum to disk
 func (bm *BufferMgr) flushAll(txnum int) {
-	for _, buff := range bm.bufferpool { // don't need pointers here right?
+	for _, buff := range bm.bufferpool {
 		if buff.txnum == txnum {
 			buff.flush()
 		}
 	}
 }
 
-// aux
+// aux functions
 
+// inner func for pin();
 func (bm *BufferMgr) tryToPin(blk BlockId) (*Buffer, error) {
 	b := bm.findExistingBuffer(blk)
 
 	// ? could put all of this timing stuff inside chooseUnpinned?
-	if b == nil {
-		//fmt.Println("Did not find existing buffer holding block")
+	if b == nil { // block not already in a buffer
 		b = bm.chooseUnpinnedBuffer()
 
-		if b == nil {
-			timeout := time.Minute / 6
+		if b == nil { // no unpinned buffers exist
+			// todo make this wait for notifyAll instead of timing out
+			timeout := time.Minute / 2 // 30 seconds
 			deadline := time.Now().Add(timeout)
 			for tries := 0; time.Now().Before(deadline); tries++ {
 				b = bm.chooseUnpinnedBuffer()
@@ -85,9 +84,8 @@ func (bm *BufferMgr) tryToPin(blk BlockId) (*Buffer, error) {
 					return b, nil
 				}
 				log.Printf("\nAll buffers in use; retrying in 10 seconds...")
-				time.Sleep(time.Second * 3) // every 10 seconds
+				time.Sleep(time.Second * 10) // every 10 seconds
 			}
-
 			// todo consider panicking here rather than just returning err
 			return nil, fmt.Errorf("no buffer was found after %s\n", timeout)
 		}
@@ -100,18 +98,19 @@ func (bm *BufferMgr) tryToPin(blk BlockId) (*Buffer, error) {
 	return b, nil
 }
 
+// compares blk to buffers in current pool and returns the pointer if it finds a match, else nil
 func (bm *BufferMgr) findExistingBuffer(blk BlockId) *Buffer {
-	// loop through to try and find buffer that already has that blk
 	for _, buff := range bm.bufferpool {
-		if buff.blk == blk { // ? is this equality comparison functional
+		if buff.blk == blk {
 			return buff
 		}
 	}
 	return nil
 }
 
+// todo update to clock algorithm
+// finds an unpinned buffer in the pool and return it (nil if there are none)
 func (bm *BufferMgr) chooseUnpinnedBuffer() *Buffer {
-	// pick a buffer that has no pins and return it
 	for _, buff := range bm.bufferpool {
 		if !buff.isPinned() {
 			return buff
@@ -120,24 +119,25 @@ func (bm *BufferMgr) chooseUnpinnedBuffer() *Buffer {
 	return nil
 }
 
+// todo
 func (bm *BufferMgr) notifyAll() {
 	// resume waiting threads to fight for buffer
 }
 
 // BUFFER---------------
-//func (bf Buffer) contents() Page {} // probs unneeded
-//func (bf Buffer) block() BlockId {} // ""   ""
-// func (bf Buffer) modifyingTx() int {} // "" (just returns txnum)
 
 // idk whether to attach to buffmgr or not
+// constructor for Buffer
 func makeBuffer(fm *FileMgr, lm *LogMgr) *Buffer {
 	return &Buffer{fm, lm, BlockId{"", 0}, makePage(fm.blocksize), 0, -1, -1}
 }
 
+// true if buffer has at least 1 pin
 func (bf *Buffer) isPinned() bool {
 	return bf.pins > 0
 }
 
+// indicate buffer was modified by txnum, record is lsn
 func (bf *Buffer) setModified(txnum int, lsn int) {
 	bf.txnum = txnum
 	if lsn >= 0 {
@@ -146,41 +146,41 @@ func (bf *Buffer) setModified(txnum int, lsn int) {
 }
 
 // aux
+
 func (bf *Buffer) flush() {
-	if bf.txnum >= 0 {
+	if bf.txnum >= 0 { // if block was modified (?)
 		bf.lm.flushLSN(bf.lsn)
-
-		// check if block was modified?
 		worked := bf.fm.writeBlock(bf.blk, bf.pg)
-		bf.txnum = -1
-
+		bf.txnum = -1 // reset txnum (don't necessarily empty page though)
 		if !worked {
 			fmt.Printf("Failed to flush a buffer with blockID %v and page %v", bf.blk, bf.pg)
 		}
 	}
 }
 
+// assign a buffer to a specific block (will make block if it doesn't exist)
 func (bf *Buffer) assignToBlock(blk BlockId) {
-	//fmt.Println("Trying to assign buffer to a block. Flushing...")
 	bf.flush()
 
 	bf.blk = blk
-	ok := bf.fm.readBlock(blk, bf.pg)
+	bf.pins = 0
 
+	ok := bf.fm.readBlock(blk, bf.pg)
 	if !ok {
+		// try creating the block if it doesn't exist, then try the read again
 		bf.fm.makeBlock(blk.filename, blk.blknum) // ???
 		ok = bf.fm.readBlock(blk, bf.pg)
-		if !ok {
+		if !ok { // no idea what could cause this
 			fmt.Printf("Failed to read block %v into buffer %v\n", blk, bf)
 		}
 	}
-
-	bf.pins = 0
 }
 
 func (bf *Buffer) pin() {
 	bf.pins++
 }
+
+// decrement by one pin (will not go down below 0)
 func (bf *Buffer) unpin() {
 	if bf.pins > 0 {
 		bf.pins--
