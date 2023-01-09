@@ -22,6 +22,7 @@ type Layout struct {
 }
 
 // SCHEMA
+// could just do var sch Schema here
 func makeSchema() Schema {
 	return Schema{make(map[string]FieldInfo)}
 }

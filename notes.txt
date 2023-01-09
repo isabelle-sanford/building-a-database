@@ -323,3 +323,5 @@ I made some changes in the process of this that I am very much uncertain about, 
 TableScan now actually works the way it's supposed to. Sometimes I could really skip a lot of work if I decided to follow what the textbook said in the first place rather than deeming it unnecessary. Sigh. 
 Todo: a bunch of commenting to explain what these functions do; cleaning out old comments and such; ch 7; more anonymous structing (might want to do a separate branch for that)
 7pm: commented / cleaned (somewhat) for ch 3 and 4 files
+7:40: wrote TblMgr with just api and got it almost right; gonna test now
+7:55 initial test failed; dinnertime
