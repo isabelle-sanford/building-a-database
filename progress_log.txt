@@ -301,7 +301,7 @@ Tests completed and work, insofar as they do what they're supposed to. Both reco
 1/3/23 9:15pm 
 Did a bit of work earlier copying record page test from book, now actually trying to test that and make it work. Schema/Layout is good as far as I can tell. 
 Consider putting all types in a separate 'definitions' file so I can remember them easier? 
-Question - should I be leaving the first 8 bytes of a block for the buffer/etc managers to use and preclude records? How should I do that / why is it not happening already (something about Java?)
+Question - should I be leaving the first 8 bytes of a block for the buffer/etc managers to use and preclude records? How should I do that / why is it not happening already (something about Java?) NVM THATS JUST FOR LOG PAGES
 stopping 9:55 for val
 
 
@@ -325,6 +325,11 @@ Todo: a bunch of commenting to explain what these functions do; cleaning out old
 7pm: commented / cleaned (somewhat) for ch 3 and 4 files
 7:40: wrote TblMgr with just api and got it almost right; gonna test now
 7:55 initial test failed; dinnertime
+
+1/11/2023 on plane, 7pm EST
+going to go through and do readme / etc so this can be shown to anyone other than me
+should name test files as like .test so I can use gitignore 
+8pm: much happier with the readme plus questions_and_concerns. Should probably go through this doc eventually and nicen / make private / idk. 
 
 
 1/17/23

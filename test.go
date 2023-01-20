@@ -1,6 +1,6 @@
 package main
 
-func testAll() {
+func main() {
 	testPage()
 	testFileMgr()
 	testLogMgr()

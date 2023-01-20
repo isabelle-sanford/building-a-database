@@ -10,7 +10,7 @@ func makeDB() myDB {
 
 	fm := makeFileMgr("mydb", 400)
 
-	lm := makeLogMgr(&fm, "log")
+	lm := makeLogMgr(&fm, "log.log")
 
 	bm := makeBufferManager(&fm, &lm, 9)
 

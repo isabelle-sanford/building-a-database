@@ -146,9 +146,9 @@ func main() {
 	fmt.Println("Catalog test:")
 	tm := makeTableMgr(tx, true)
 
-	var sch Schema = makeSchema()
-	sch.addIntField("A")
-	sch.addStringField("B", 9)
+	// 	var sch Schema = makeSchema()
+	// 	sch.addIntField("A")
+	// 	sch.addStringField("B", 9)
 
 	fmt.Println("Creating table 'MyTable'...")
 	tm.createTable("MyTable", sch, tx)
