@@ -37,13 +37,14 @@ func (fm *FileMgr) makeBlock(filename string, blknum int) BlockId {
 func makeFileMgr(dbDir string, blocksize int) FileMgr {
 	_, err := os.Open(dbDir) // ! no // might need to close?
 	isNew := false
-	if errors.Is(err, os.ErrNotExist) { // when do you change from isNew?
+	if errors.Is(err, os.ErrNotExist) { // ! when not new?
 		isNew = true
-		os.MkdirAll(dbDir, 0777) // !! perms??
+		os.MkdirAll(dbDir, 0600) // !! perms??
 	}
 	// remove any leftover temp tables
 
 	openFiles := make(map[string]int)
+	fmt.Println("openFiles during fmgr construction: ", openFiles)
 
 	return FileMgr{dbDir, isNew, openFiles, blocksize}
 }

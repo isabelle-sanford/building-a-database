@@ -50,7 +50,7 @@ func (rp *RecordPage) format() {
 	for rp.isValidSlot(slot) {
 		rp.tx.setInt(rp.blk, rp.offset(slot), EMPTY, false)
 		sch := rp.layout.schema
-		for f := range sch.fields {
+		for _, f := range sch.fieldlist {
 			fldpos := rp.offset(slot) + rp.layout.offsets[f]
 			if sch.fldtype(f) == INTEGER {
 				rp.tx.setInt(rp.blk, fldpos, 0, false)

@@ -7,7 +7,8 @@ const VARCHAR = 3
 const INTBYTES = 8 // Integer.BYTES in java
 
 type Schema struct {
-	fields map[string]FieldInfo
+	fields    map[string]FieldInfo
+	fieldlist []string
 }
 
 type FieldInfo struct {
@@ -24,42 +25,45 @@ type Layout struct {
 // SCHEMA
 // could just do var sch Schema here
 func makeSchema() Schema {
-	return Schema{make(map[string]FieldInfo)}
+	return Schema{make(map[string]FieldInfo), make([]string, 1)}
 }
 
-func (s Schema) addField(fldname string, fldtype int, length int) {
+func (s *Schema) addField(fldname string, fldtype int, length int) {
 	s.fields[fldname] = FieldInfo{fldtype, length}
+	s.fieldlist = append(s.fieldlist, fldname)
+	//fmt.Println("adding field ", fldname, "fldlist is now ", s.fieldlist)
 }
 
-func (s Schema) addIntField(fldname string) {
+func (s *Schema) addIntField(fldname string) {
 	s.addField(fldname, INTEGER, 0)
 }
 
-func (s Schema) addStringField(fldname string, length int) {
+func (s *Schema) addStringField(fldname string, length int) {
 	s.addField(fldname, VARCHAR, length)
 }
 
-func (s Schema) add(fldname string, sch Schema) {
+func (s *Schema) add(fldname string, sch Schema) {
 	fldtype := sch.fldtype(fldname)
 	length := sch.length(fldname)
 	s.addField(fldname, fldtype, length)
 }
 
-func (s Schema) addAll(sch Schema) { // ! TEST
+func (s *Schema) addAll(sch Schema) { // ! TEST
 	for f := range sch.fields {
 		s.add(f, sch)
+		s.fieldlist = sch.fieldlist
 	}
 }
 
-func (s Schema) fldtype(fldname string) int {
+func (s *Schema) fldtype(fldname string) int {
 	return s.fields[fldname].fldtype
 }
 
-func (s Schema) length(fldname string) int {
+func (s *Schema) length(fldname string) int {
 	return s.fields[fldname].length
 }
 
-func (s Schema) hasField(fldname string) bool {
+func (s *Schema) hasField(fldname string) bool {
 	_, ok := s.fields[fldname]
 	return ok
 }
@@ -68,7 +72,7 @@ func (s Schema) hasField(fldname string) bool {
 func makeLayoutFromSchema(sch Schema) Layout {
 	offsets := make(map[string]int)
 	pos := INTBYTES // hmm (could be 1? idk)
-	for f := range sch.fields {
+	for _, f := range sch.fieldlist {
 		offsets[f] = pos
 		pos += sch.lengthInBytes(f)
 	}

@@ -26,7 +26,8 @@ func makeTableScan(tx *Transaction, tblname string, layout Layout) TableScan {
 	t := TableScan{tx: tx, tblname: tblname, layout: layout, filename: filename}
 
 	if tx.fm.openFiles[filename] > 0 {
-		fmt.Println("file already has stuff in it!")
+		//fmt.Println("file already has stuff in it!")
+		//fmt.Println("has stuff; openFiles looks like: ", tx.fm.openFiles)
 		t.moveToBlock(0)
 	} else {
 		t.moveToNewBlock()
@@ -90,6 +91,16 @@ func (t *TableScan) insert() {
 	t.currslot = newslot
 }
 
+// func (t *TableScan) getVal(fldname string) {
+
+// 	typ := t.layout.schema.fields[fldname]
+// 	if typ.fldtype == INTEGER {
+// 		val := t.rp.getInt(t.currslot, fldname)
+// 	} else if typ.fldtype == VARCHAR {
+// 		val := t.rp.getString(t.currslot, fldname)
+// 	}
+// }
+
 func (t *TableScan) getInt(fldname string) int {
 	return t.rp.getInt(t.currslot, fldname)
 }
@@ -139,6 +150,49 @@ func (t *TableScan) moveToBlock(newblknum int) {
 
 func (t *TableScan) atLastBlock() bool {
 	return t.tx.fm.openFiles[t.filename]-1 == t.rp.blk.blknum
+}
+
+func (ts *TableScan) printTable() {
+	ts.beforeFirst()
+
+	fmt.Println(ts.layout.schema.fieldlist)
+
+	for ts.next() {
+		fmt.Println(ts.printRecord())
+	}
+}
+
+func (ts *TableScan) printRecord() string {
+	var s string
+	var val string
+	for _, fldname := range ts.layout.schema.fieldlist {
+		fld := ts.rp.layout.schema.fields[fldname]
+		if fld.fldtype == VARCHAR {
+			val = ts.getString(fldname)
+		} else {
+			val = fmt.Sprint(ts.getInt(fldname))
+		}
+
+		s += val + " "
+	}
+	return s
+}
+
+func (ts *TableScan) printSingleRecord() {
+	var s string
+	var val string
+	for _, fldname := range ts.layout.schema.fieldlist {
+		fld := ts.layout.schema.fields[fldname]
+		if fld.fldtype == VARCHAR {
+			val = ts.getString(fldname)
+		} else {
+			val = fmt.Sprint(ts.getInt(fldname))
+		}
+
+		s += val + " "
+	}
+
+	fmt.Println(s)
 }
 
 // tableScanTest

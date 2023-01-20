@@ -325,3 +325,26 @@ Todo: a bunch of commenting to explain what these functions do; cleaning out old
 7pm: commented / cleaned (somewhat) for ch 3 and 4 files
 7:40: wrote TblMgr with just api and got it almost right; gonna test now
 7:55 initial test failed; dinnertime
+
+
+1/17/23
+(met 1-2pm with geoff)
+7:15(?) wrote out initial Timeline.md for geoff 
+7:45 started investigating error in tblmgr, which is that it gets stuck in an infinite loop somewhere inside the tblmgr constructor I think? tracing back through createTable, it's something about doing a double tablescan or something. stopping at 8:15ish tho
+
+1/19/23
+2:30pm 
+working on same eror again, slowly
+3:30 made a print table function that's not awful (could be better)
+turns out the problem was in getLayout oops
+aaand a typo of tblcat instead of fldcat 
+3:50 test works now!
+now doing CatalogTest, facing some kind of second-time-around error
+
+
+1/20/23
+still working on error from above. definitely PART of the problem is that I wasn't changing the isNew bool, which was a little silly, but it still isn't right
+one thing I did do yesterday is add a fieldlist slice to Schema, because I realized that the map[] version has no guaranteed order, which could cause problems. 
+problem appears to be that constructing that fieldlist isn't working, so I'm indirecting every schema function. that fixed it! tho the table prints all have a 0 at the front and I'm not sure why
+really wish I had a way to expose / print actual pages from this higher level
+okay so it seems like the problem was that on a second run (for some reason??) the getLayout function used on the table and field catalogs was working improperly, and using the inbuilt layouts inside the table manager object made it fine. Still a bit concerned about the bad read of Layout, come back to later?
