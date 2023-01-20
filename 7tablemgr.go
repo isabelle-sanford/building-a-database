@@ -137,18 +137,14 @@ func (tm *TableMgr) showFldCatalog() {
 }
 
 func CatalogTest() {
-
-}
-
-func main() {
 	db := makeDB()
 	tx := db.makeTx()
-	fmt.Println("Catalog test:")
 	tm := makeTableMgr(tx, true)
 
-	// 	var sch Schema = makeSchema()
-	// 	sch.addIntField("A")
-	// 	sch.addStringField("B", 9)
+	fmt.Println("Catalog test:")
+	var sch Schema = makeSchema()
+	sch.addIntField("A")
+	sch.addStringField("B", 9)
 
 	fmt.Println("Creating table 'MyTable'...")
 	tm.createTable("MyTable", sch, tx)
@@ -158,13 +154,7 @@ func main() {
 
 	fmt.Println()
 
-	//tblcatlayout := tm.getLayout("tblcat", tx)
 	tCat := makeTableScan(tx, "tblcat", tm.tblcat)
-
-	//fmt.Println("table catalog layout: ", tblcatlayout)
-	//fmt.Println("\ntable catalog table scan: ", tCat)
-
-	//fmt.Println("table catalog Record Page: ", tCat.rp.blk)
 
 	fmt.Println("\nAll tables and their lengths:")
 	for tCat.next() {
@@ -175,19 +165,10 @@ func main() {
 	tCat.close()
 	fmt.Println()
 
-	//fldcatlayout := tm.getLayout("fldcat", tx)
 	fCat := makeTableScan(tx, "fldcat", tm.fldcat)
-
-	// fmt.Println("field catalog layout: ", fldcatlayout)
-	// fmt.Println("\nfield catalog table scan: ", fCat)
-
-	// fmt.Println("field catalog Record Page: ", fCat.rp.blk)
-	//fmt.Println("\nfield catalog table scan: ", fCat)
 
 	fmt.Println("\nAll fields and their offsets:")
 	for fCat.next() {
-
-		//fCat.printSingleRecord()
 
 		tname := fCat.getString("tblname")
 		fname := fCat.getString("fldname")
@@ -196,6 +177,20 @@ func main() {
 		//fmt.Println(tname, " ", fname, " ", offset)
 	}
 	fCat.close()
+}
+
+func tableMgrTest() {
+	db := makeDB()
+	tx := db.makeTx()
+	tm := makeTableMgr(tx, true)
+
+	fmt.Println("Catalog test:")
+	var sch Schema = makeSchema()
+	sch.addIntField("A")
+	sch.addStringField("B", 9)
+
+	fmt.Println("Creating table 'MyTable'...")
+	tm.createTable("MyTable", sch, tx)
 
 	fmt.Println("\nTM test:")
 	layout := tm.getLayout("MyTable", tx)

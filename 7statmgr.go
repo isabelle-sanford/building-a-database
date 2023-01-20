@@ -14,7 +14,7 @@ type StatMgr struct {
 }
 
 type StatInfo struct {
-	//tx *Transaction
+	sm        *StatMgr
 	tblname   string
 	numblocks int
 	numrecs   int
@@ -22,7 +22,18 @@ type StatInfo struct {
 }
 
 func (sm *StatMgr) makeStatInfo(tblname string) *StatInfo {
-	tbl := makeTableScan(sm.tx, tblname, sm.tm.getLayout(tblname, sm.tx))
+
+	// could put fields in here?
+	si := StatInfo{sm, tblname, -1, -1, make(map[string]int)} // NO (offsets is not # distinct values ???)
+
+	si.refreshTableStatistics()
+
+	return &si
+
+}
+
+func (si StatInfo) refreshTableStatistics() {
+	tbl := makeTableScan(si.sm.tx, si.tblname, si.sm.tm.getLayout(si.tblname, si.sm.tx))
 
 	numrecs := 0
 
@@ -30,14 +41,11 @@ func (sm *StatMgr) makeStatInfo(tblname string) *StatInfo {
 		numrecs++
 	}
 
-	numblocks := tbl.currentRID().blknum
+	si.numblocks = tbl.currentRID().blknum
 
-	si := StatInfo{tblname, numblocks, numrecs, tbl.layout.offsets} // NO (offsets is not # distinct values ???)
-
-	return &si
-
+	si.numrecs = numrecs
 }
 
-func (si StatInfo) refreshTableStatistics() {
+func main() {
 
 }
