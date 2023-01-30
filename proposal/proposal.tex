@@ -1,0 +1,126 @@
+% source/licensing info at the end
+
+%----------------------------------------------------------------------------------------
+\documentclass[12pt, oneside]{amsart} % Uses amsart class in A4 format
+
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\voffset}{-15pt}
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+% formatting
+\usepackage[letterpaper, margin=1in]{geometry} % Sets margin to 1in
+\usepackage[onehalfspacing]{setspace} % Sets Spacing to 1.5
+\usepackage[utf8]{inputenc} % Use UTF-8 encoding
+\usepackage[all]{nowidow} % Removes widows
+\usepackage{parskip} % what does this do???
+\usepackage{datetime2} % Uses YEAR-MONTH-DAY format for dates
+
+% headers & footers-----------
+\usepackage{fancyhdr} % Headers and footers
+\pagestyle{fancy} % All pages have headers and footers
+\fancyfoot[R]{Isabelle Sanford} 
+\fancyfoot[L]{\thepage}
+\fancyfoot[C]{} % blank out the default page number
+
+% images & urls
+\usepackage[final, colorlinks = true, 
+            linkcolor = blue, 
+            citecolor = black,
+            urlcolor = blue]{hyperref} % For hyperlinks in the PDF
+\usepackage{graphicx, multicol} % Enhanced support for graphics
+
+% math stuff setup
+\usepackage[english]{babel} % Language hyphenation and typographical rules
+
+\usepackage{amsthm, amsmath, amssymb, stix} % Mathematical typesetting
+\usepackage[]{algorithm2e}
+
+
+% Definition, Theorem, Lemma, Exercise, Reflection, Proposition, Corollary
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{lemma}{Lemma}
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\title{Senior Project Proposal} % Article title
+
+\begin{minipage}{0.295\textwidth} % Left side of title section
+\raggedright
+CMSC 399\\ % Your lecture or course
+\footnotesize % Authors text size
+%\hfill\\ % Uncomment if right minipage has more lines
+Senior Seminar % Your name
+\medskip\hrule
+\end{minipage}
+\begin{minipage}{0.4\textwidth} % Center of title section
+\centering 
+\large % Title text size
+Database Project\\ % title
+\normalsize 
+Proposal \\ % subtitle
+\end{minipage}
+\begin{minipage}{0.295\textwidth} % Right side of title section
+\raggedleft
+Isabelle Sanford \\% Date
+\footnotesize 
+%\hfill\\ % Uncomment if left minipage has more lines
+isanford@brynmawr.edu
+\medskip\hrule
+\end{minipage}\\
+%--------------------------------------------------------------------------------------
+
+\section{Summary}
+
+[1 sentence summary]
+
+This project is to build a simple version of a database engine, which can be modified easily to understand and test the use of various common database features. 
+
+
+
+
+\section{Problem Statement}
+Databases are a vital part of everyday life, and something that many programmers will have to interact with regularly throughout their careers. But modern databases are practically inscrutable, because of the level of complexity required for commercial-level databases (ehhh). This isn't usually a problem for the end user, if the user interface is designed well, but there are people who need to actually understand what's going on and how these things work. That's people like database admins, data scientists, and the database engineers who made it all in the first place. Teaching the theory of these structures is as easy as any other bit of computer science, but practical examples are fairly difficult. Looking at the internals of a modern database is too much, like trying to teach highschool level chemistry using a graduate-level book. It'll kind of work, but it'll also require a lot of ignoring details that aren't important yet. [don't love that analogy, maybe just do a direct comparison to OS?] Instead, what's needed is a small, simple database engine with clear and alterable internals. [something about optimizing evaluation things?]
+
+
+\section{Proposed Solution}
+
+This project is a simple (though functional) database, designed to have most of the basic features of a modern database, but implemented in a clearer and more naive way. It's written in Go, a language which would be reasonable for this kind of database to be written in. 
+
+\section{Evaluation Plan}
+
+
+\section{Potential Challenges}
+
+\section{Bio}
+
+\section{Elevator Pitch}
+
+
+\end{document}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Homework Assignment Article LaTeX Template
+% Version 1.3.5r (2018-02-16)
+% This template has been downloaded from: /cl.uni-heidelberg.de/~zimmermann/
+%
+% Original author: Victor Zimmermann (zimmermann@cl.uni-heidelberg.de)
+% Modified and used by Isabelle Sanford
+%
+% License: CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
