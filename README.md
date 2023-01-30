@@ -15,11 +15,11 @@ Functionalities as of 1/11/23 (the numbers indicate which chapter of the textboo
 - [4,5] The database has a _log manager_, which records each change to the database as they occur, so that returning to a previous state is possible (whether intentionally by reverting a change, or for restoring if the database crashes). These changes are grouped into distinct _transactions_, one from each concurrent user, so that users do not interfere with each other and so that changes are not officially made until the user sends a signal to commit. (If a user crashed unexpectedly, having a partially-done set of changes could be very bad!)
 - [5] Note that proper concurrency safety is _not_ implemented at the moment, and is planned for after finishing the bare bones of the databse structure.
 - [6] Database records are stored in record pages, which can be retrieved from inside blocks. The way they are stored and accessed is determined by the _schema_ and _layout_ of each table. This is essentially what the fields (columns) of the table are called and what type they store (e.g. integer, string, blob). Accessing or modifying the record pages is done with a _table scan_.
-- [7] IN PROGRESS: The database keeps track of the tables via a _table manager_, which keeps lists of all tables and their fields (including field types).
+- [7] The database keeps track of the tables via a _table manager_, which keeps lists of all tables and their fields (including field types).
+- [7] IN PROGRESS: The database keeps track of basic statistics about the tables, in order to significantly optimize queries.
 
 Planning to implement:
 
-- [7] The database keeps track of basic statistics about the tables, in order to significantly optimize queries.
 - [8] The database has functions it can use to perform relational algebra on its data (e.g. it can filter a table based on a given criteria and return the shortened table).
 - [9] The database can parse (basic) SQL queries given as strings into the relational algebra components it is familiar with, and return accurate results.
 
