@@ -353,3 +353,8 @@ one thing I did do yesterday is add a fieldlist slice to Schema, because I reali
 problem appears to be that constructing that fieldlist isn't working, so I'm indirecting every schema function. that fixed it! tho the table prints all have a 0 at the front and I'm not sure why
 really wish I had a way to expose / print actual pages from this higher level
 okay so it seems like the problem was that on a second run (for some reason??) the getLayout function used on the table and field catalogs was working improperly, and using the inbuilt layouts inside the table manager object made it fine. Still a bit concerned about the bad read of Layout, come back to later?
+
+
+1/30/23
+working on proposal (haven't been bothering to track time for it) and thought of a maybe good thing to test later - 
+try several different block sizes in the range of the OS's page size and see if any are noticeably better or worse (and ideally you do see it get worse once you go past the page size)

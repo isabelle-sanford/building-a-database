@@ -1,5 +1,8 @@
 # Ongoing List of Questions / Concerns for later
 
+- database vs database engine
+
+
 - Do I need to deal with offsets somewhere - i.e. making sure I'm storing integers/characters at the proper offset in the block so it works? I know Java handles that automatically, but what about Go?
 - When I print a list of bytes, why do integers always show up as double the amount I'm expecting? (e.g. a byte labeled 1 will print as 2)
 - Am I still filling every other slot or did I fix that?
