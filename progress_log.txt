@@ -358,3 +358,12 @@ okay so it seems like the problem was that on a second run (for some reason??) t
 1/30/23
 working on proposal (haven't been bothering to track time for it) and thought of a maybe good thing to test later - 
 try several different block sizes in the range of the OS's page size and see if any are noticeably better or worse (and ideally you do see it get worse once you go past the page size)
+
+1/31
+12:30
+stats manager test works now (dunno what was wrong before tbh)
+need to think about how to do get/set methods and where needed and how that intersects with making things public/private
+todo later - MUST go over his code for statmgr and check it
+
+interfaces in Go ? 
+also get and set methods

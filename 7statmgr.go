@@ -77,12 +77,21 @@ func (si *StatInfo) getDistinct(fldname string) int {
 	return 1 + si.numrecs/3 // nope!
 }
 
-func (sm *StatMgr) getStatInfo(tblname string, layout Layout, tx Transaction) {
+// might need layout arg? not sure why tho
+// don't even really need tx
+func (sm *StatMgr) getStatInfo(tblname string, tx *Transaction) *StatInfo {
+
+	si := sm.tableStats[tblname]
+
 	sm.numcalls++
 	if sm.numcalls > 100 {
-		sm.re
+		si.refreshTableStatistics()
 	}
+
+	return &si
 }
+
+// todo tostring for stat info
 
 func main() {
 	db := makeDB()
@@ -125,6 +134,10 @@ func main() {
 
 	si := sm.tableStats["Table1"]
 
-	fmt.Printf("%d %d %d\n", si.numblocks, si.numrecs, si.getDistinct("A"))
+	fmt.Printf("%d blocks, %d recs, %d distinct in A\n", si.numblocks, si.numrecs, si.getDistinct("A"))
+
+	si2 := sm.getStatInfo("Table1", tx)
+
+	fmt.Println(si2)
 
 }

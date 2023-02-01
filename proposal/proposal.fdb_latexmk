@@ -1,6 +1,6 @@
 # Fdb version 3
-["pdflatex"] 1675112095 "/home/isanford/work_by_language/go/mydb/proposal/proposal.tex" "proposal.pdf" "proposal" 1675112096
-  "/home/isanford/work_by_language/go/mydb/proposal/proposal.tex" 1675112094 7112 7f925f9108b7f841a5088ef0d6a12d42 ""
+["pdflatex"] 1675185738 "/home/isanford/work_by_language/go/mydb/proposal/proposal.tex" "proposal.pdf" "proposal" 1675185738
+  "/home/isanford/work_by_language/go/mydb/proposal/proposal.tex" 1675185737 10574 5375dc7c4da41b7256d021f46f790b8d ""
   "/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/stix/stix-t1.enc" 1388795362 7013 c55cc8669071ac14036c4a0c96c16202 ""
   "/usr/local/texlive/2021/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2021/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -119,9 +119,9 @@
   "/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1630626981 5184997 e8ebe783312624c87e02fd98e3693f46 ""
   "/usr/local/texlive/2021/texmf-var/web2c/pdftex/pdflatex.fmt" 1630627026 2798001 f846054f58e7967ed9dfef3a1a9b5338 ""
   "/usr/local/texlive/2021/texmf.cnf" 1630626977 455 5b996dcaa0eb4ef14a83b026bc0a008c ""
-  "proposal.aux" 1675112096 1742 9ca99fd1d8d7348d6353f8e622a79600 "pdflatex"
-  "proposal.out" 1675112096 907 2aa5f927cd6fe930fe01f09b705ab408 "pdflatex"
-  "proposal.tex" 1675112094 7112 7f925f9108b7f841a5088ef0d6a12d42 ""
+  "proposal.aux" 1675185738 1742 90bec9196150d9f1e6165a1f2c7b9d84 "pdflatex"
+  "proposal.out" 1675185738 907 2aa5f927cd6fe930fe01f09b705ab408 "pdflatex"
+  "proposal.tex" 1675185737 10574 5375dc7c4da41b7256d021f46f790b8d ""
   (generated)
   "proposal.aux"
   "proposal.out"
