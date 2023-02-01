@@ -367,3 +367,26 @@ todo later - MUST go over his code for statmgr and check it
 
 interfaces in Go ? 
 also get and set methods
+
+
+2/1 
+opened code at 1ish but didn't do work till about 3:30
+checked statmgr code against sciore and fixed it 
+
+
+TODO:
+- code metadatamgr test 
+- figure out how logging works 
+- figure out how interfaces work
+- read ch 7 exercises and note good ones
+- actually read ch 8 properly
+- skim ch 9 (and then read)
+
+want ch 8 and 9 done by tuesday 2/7
+
+
+reading about interfaces and - I should really use this (or really generics / supertypes) for some of those getString getInt whatever methods. probably? 
+ok yeah they're about the same as java and they're declared just like structs but with the word 'interface' there instead
+
+started selectscan but mostly stopped by 5ish 
+because I'm not sure how to do this right with interfaces
