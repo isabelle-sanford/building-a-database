@@ -13,14 +13,13 @@ V(T,F): for each field F of table T, number of distinct F-values in T
 */
 
 type StatMgr struct {
-	tm         *TableMgr
-	tx         *Transaction
+	tm *TableMgr
+	//tx         *Transaction
 	tableStats map[string]StatInfo
 	numcalls   int
 }
 
 type StatInfo struct {
-	sm        *StatMgr
 	tblname   string
 	numblocks int
 	numrecs   int
@@ -28,67 +27,68 @@ type StatInfo struct {
 }
 
 func makeStatMgr(tm *TableMgr, tx *Transaction) StatMgr {
-	tblcat := makeTableScan(tx, "tblcat", tm.tblcat) // probably shouldn't hard-code like that
 
-	tableStats := make(map[string]StatInfo, 0)
-
-	sm := StatMgr{tm, tx, tableStats, 0}
-
-	for tblcat.next() {
-		tblname := tblcat.getString("tblname")
-
-		tableStats[tblname] = *sm.makeStatInfo(tblname)
-	}
+	sm := StatMgr{tm, make(map[string]StatInfo, 0), 0}
+	sm.refreshStatistics(tx)
 
 	return sm
 }
 
-func (sm *StatMgr) makeStatInfo(tblname string) *StatInfo {
+// might need layout arg? not sure why tho
+// don't even really need tx
+func (sm *StatMgr) getStatInfo(tblname string, layout Layout, tx *Transaction) *StatInfo {
+	sm.numcalls++
+	if sm.numcalls > 100 {
+		sm.refreshStatistics(tx)
+	}
 
-	// could put fields in here?
-	si := StatInfo{sm, tblname, -1, -1, make(map[string]int)} // NO (offsets is not # distinct values ???)
+	si, ok := sm.tableStats[tblname]
 
-	si.refreshTableStatistics()
-
-	sm.tableStats[tblname] = si
+	if !ok {
+		si = calcTableStats(tblname, layout, tx)
+		sm.tableStats[tblname] = si
+	}
 
 	return &si
+}
+
+func (sm *StatMgr) refreshStatistics(tx *Transaction) {
+	sm.numcalls = 0
+	sm.tableStats = make(map[string]StatInfo)
+	tcat := makeTableScan(tx, "tblcat", sm.tm.tblcat) // probably shouldn't hard-code like that
+
+	for tcat.next() {
+		tblname := tcat.getString("tblname")
+		layout := sm.tm.getLayout(tblname, tx)
+		si := calcTableStats(tblname, layout, tx)
+		sm.tableStats[tblname] = si
+	}
+	tcat.close() // I forget what this does
 
 }
 
-// need an if-not-exists
-func (si *StatInfo) refreshTableStatistics() {
-	tbl := makeTableScan(si.sm.tx, si.tblname, si.sm.tm.getLayout(si.tblname, si.sm.tx))
+// need an if-not-exists (though always should?)
+func calcTableStats(tblname string, layout Layout, tx *Transaction) StatInfo {
+
+	tbl := makeTableScan(tx, tblname, layout)
 
 	numrecs := 0
+	numblocks := 0
 
 	for tbl.next() {
 		numrecs++
+		numblocks = tbl.currentRID().blknum + 1 // plus 1 for zero-indexing
 	}
 
-	si.numblocks = tbl.currentRID().blknum
+	distincts := make(map[string]int) // todo
 
-	si.numrecs = numrecs
+	tbl.close()
 
-	// ! add distincts
+	return StatInfo{tblname, numblocks, numrecs, distincts}
 }
 
 func (si *StatInfo) getDistinct(fldname string) int {
 	return 1 + si.numrecs/3 // nope!
-}
-
-// might need layout arg? not sure why tho
-// don't even really need tx
-func (sm *StatMgr) getStatInfo(tblname string, tx *Transaction) *StatInfo {
-
-	si := sm.tableStats[tblname]
-
-	sm.numcalls++
-	if sm.numcalls > 100 {
-		si.refreshTableStatistics()
-	}
-
-	return &si
 }
 
 // todo tostring for stat info
@@ -130,13 +130,13 @@ func main() {
 
 	fmt.Println(sm)
 
-	sm.makeStatInfo("Table1")
+	si := sm.getStatInfo("Table1", layout, tx)
 
-	si := sm.tableStats["Table1"]
+	fmt.Println(sm)
 
 	fmt.Printf("%d blocks, %d recs, %d distinct in A\n", si.numblocks, si.numrecs, si.getDistinct("A"))
 
-	si2 := sm.getStatInfo("Table1", tx)
+	si2 := sm.getStatInfo("Table1", layout, tx)
 
 	fmt.Println(si2)
 
