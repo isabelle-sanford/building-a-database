@@ -390,3 +390,16 @@ ok yeah they're about the same as java and they're declared just like structs bu
 
 started selectscan but mostly stopped by 5ish 
 because I'm not sure how to do this right with interfaces
+
+2/5 
+12:30(?)
+working through ch 8 scans / term-const-expression-etc stuff 
+
+2:45 it's mostly working? little concerned about the pointers stuff 
+can't really test bc the 'Plan' class isn't in here yet
+but also bc it's kinda scuffed and not quite all there tbh 
+gonna move on to ch 9 to at least get some stuff done
+....chapter 9 is gonna take some work with strings 
+
+4:30 well that took a WHILE 
+but everything in ch 9 is written out and should work except for Lexer which will take some more work
