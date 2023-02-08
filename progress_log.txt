@@ -439,3 +439,9 @@ might need to use this if Scanner doesn't work: https://github.com/google/shlex/
 
 working on lexer now and honestly very uncertain about most of these methods. PLEASE REMEMBER TO TEST 
 11:30 finished lexer attempt. really hope this works
+
+oh! how to compare two strings lexicographically - use strings.Compare(a, b)
+
+so there might be a problem with using `` for strings instead of ""? 
+
+12:30 finished and debugged LexerTest func, which... is definitely not sufficient for actual testing honestly, but it's something
