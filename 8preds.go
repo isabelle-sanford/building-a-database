@@ -82,6 +82,7 @@ func (e Expression) isFieldName() bool {
 }
 
 // getters?
+
 func (e Expression) evaluate(s Scan) Constant {
 	if e.isConst {
 		return e.val

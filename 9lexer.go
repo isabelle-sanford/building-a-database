@@ -1,36 +1,115 @@
 package main
 
-var keywords []string = []string{"select", "from", "where", "and", "insert", "into", "values", "delete",
-	"update", "set", "create", "table", "varchar", "int", "view", "as", "index", "on"}
+import (
+	"strconv"
+	"strings"
+	"text/scanner"
+)
+
+var keywords map[string]bool = map[string]bool{"select": true, "from": true, "where": true, "and": true, "insert": true, "into": true, "values": true, "delete": true, "update": true, "set": true, "create": true, "table": true, "varchar": true, "int": true, "view": true, "as": true, "index": true, "on": true}
 
 type Lexer struct {
-	keywords []string // might need map
-	// ! streamtokenizer
+	keywords map[string]bool // might need map
+	tok      scanner.Scanner
+	currTok  rune
 }
 
-type PredParser struct {
-	lex Lexer
+func makeLexer(s string) Lexer {
+	var tok scanner.Scanner
+	tok.Init(strings.NewReader(s))
+
+	currTok := tok.Scan()
+
+	return Lexer{keywords, tok, currTok}
 }
 
-type Parser struct {
-	lex Lexer
+func (l *Lexer) matchDelim(d rune) bool { // int should be char
+	return l.tok.Peek() == d // honestly no idea if that works
+}
+func (l *Lexer) matchIntConstant() bool {
+	_, err := strconv.Atoi(l.tok.TokenText())
+	if err == nil {
+		return true
+	}
+	return false // i guess
+}
+func (l *Lexer) matchStringConstant() bool {
+	return strconv.QuoteRune(l.tok.Peek()) == "'"
+}
+func (l *Lexer) matchKeyword(w string) bool {
+	return l.tok.TokenText() == w
+}
+func (l *Lexer) matchId() bool {
+	_, ok := l.keywords[l.tok.TokenText()]
+	// todo check that it's actually a word
+	return ok
 }
 
-func makeLexer(s string) Lexer
+func (l *Lexer) eatDelim(d rune) (ok bool) {
+	ok = true
+	if !l.matchDelim(d) {
+		ok = false
+	} else {
+		l.tok.Scan()
+	}
+	return
+}
+func (l *Lexer) eatIntConstant() (i int, ok bool) {
+	ok = true
+	if !l.matchIntConstant() {
+		ok = false
+		return
+	} else {
+		i, _ = strconv.Atoi(l.tok.TokenText())
+		l.tok.Scan()
+		return
+	}
+}
+func (l *Lexer) eatStringConstant() (s string, ok bool) {
+	ok = true
+	if !l.matchStringConstant() {
+		ok = false
+		return
+	} else {
+		s = l.tok.TokenText()
+		l.tok.Scan()
+		return
+	}
+}
+func (l *Lexer) eatKeyword(w string) (ok bool) {
+	ok = true
+	if !l.matchKeyword(w) {
+		ok = false
+	} else {
+		l.tok.Scan()
+	}
+	return
+}
+func (l *Lexer) eatId() (id string, ok bool) {
+	ok = true
+	if !l.matchId() {
+		ok = false
+	} else {
+		id = l.tok.TokenText()
+		l.tok.Scan()
+	}
+	return
+}
 
-func (l *Lexer) matchDelim(d int) bool // int should be char
-func (l *Lexer) matchIntConstant() bool
-func (l *Lexer) matchStringConstant() bool
-func (l *Lexer) matchKeyword(w string) bool
-func (l *Lexer) matchId() bool
+func (l *Lexer) nextToken() {
+	if l.tok.Next() != scanner.EOF {
+		l.tok.Scan()
+	} else {
+		//! error
+	}
+}
 
-func (l *Lexer) eatDelim(d int) // 'int' is char
-func (l *Lexer) eatIntConstant() int
-func (l *Lexer) eatStringConstant() string
-func (l *Lexer) eatKeyword(w string)
-func (l *Lexer) eatId() string
+// page 243
+func LexerTest() {
+	x := ""
+	y := 0
 
-func (l *Lexer) nextToken()
+}
 
 // func initKeywords() []string {
 // 	keywords := []string{"select","from","where","and","insert","into","values","delete",
@@ -39,235 +118,3 @@ func (l *Lexer) nextToken()
 // }
 
 // PRED PARSER
-
-func (pp *PredParser) field() {
-	pp.lex.eatId()
-}
-
-func (pp *PredParser) constant() {
-	if pp.lex.matchStringConstant() {
-		pp.lex.matchIntConstant()
-	} else {
-		pp.lex.eatIntConstant()
-	}
-}
-
-func (pp *PredParser) expression() {
-	if pp.lex.matchId() {
-		pp.field()
-	} else {
-		pp.constant()
-	}
-}
-
-func (pp *PredParser) term() {
-	pp.expression()
-	pp.lex.eatDelim('=')
-	pp.expression()
-}
-
-func (pp *PredParser) predicate() {
-	pp.term()
-	if pp.lex.matchKeyword("and") {
-		pp.lex.keyword("and") // ???
-		pp.predicate()
-	}
-}
-
-// PARSER
-
-func makeParser(s string) Parser {
-	p := Parser{makeLexer(s)}
-	return p
-}
-
-func (p *Parser) field() string {
-	return p.lex.eatId()
-}
-
-func (p *Parser) constant() Constant {
-	if p.lex.matchStringConstant() {
-		return makeConstString(p.lex.eatStringConstant())
-	} else {
-		return makeConstInt(p.lex.eatIntConstant())
-	}
-}
-
-func (p *Parser) expression() Expression {
-	if p.lex.matchId() {
-		return makeExprFld(p.field())
-	} else {
-		return makeExprConst(p.constant())
-	}
-}
-
-func (p *Parser) term() Term {
-	lhs := p.expression()
-	p.lex.eatDelim('=')
-	rhs := p.expression()
-	return Term{lhs, rhs}
-}
-
-func (p *Parser) predicate() *Predicate {
-	pred := makePredwTerm(p.term())
-	if p.lex.matchKeyword("and") {
-		p.lex.eatKeyword("and")
-		pred.conjoinWith(p.predicate())
-	}
-	return &pred
-}
-
-func (p *Parser) query() QueryData {
-	p.lex.eatKeyword("select")
-	fields := p.selectList()
-	p.lex.eatKeyword("from")
-	tables := p.tableList()
-	var pred *Predicate
-	if p.lex.matchKeyword("where") {
-		p.lex.eatKeyword("where")
-		pred = p.predicate()
-	}
-	return QueryData{fields, tables, pred}
-}
-
-func (p *Parser) selectList() []string {
-	L := []string{p.field()}
-	if p.lex.matchDelim(',') {
-		p.lex.eatDelim(',')
-		L = append(L, p.selectList()...)
-	}
-	return L
-}
-
-func (p *Parser) tableList() []string {
-	L := []string{p.lex.eatId()}
-	if p.lex.matchDelim(',') {
-		p.lex.eatDelim(',')
-		L = append(L, p.tableList()...)
-	}
-	return L
-}
-
-func (p *Parser) updateCmd() { // returns something ???
-	if p.lex.matchKeyword("insert") {
-		return p.insert()
-	} else if p.lex.matchKeyword("delete") {
-		return p.delete()
-	} else if p.lex.matchKeyword("update") {
-		return p.modify()
-	} else {
-		return p.create()
-	}
-}
-
-func (p *Parser) create() { // returns ??
-	p.lex.eatKeyword("create")
-	if p.lex.matchKeyword("table") {
-		return createTable()
-	} else if p.lex.matchKeyword("view") {
-		return createView() // might not be valid
-	} else {
-		return createIndex() // might not be valid
-	}
-}
-
-func (p *Parser) delete() DeleteData {
-	p.lex.eatKeyword("delete")
-	p.lex.eatKeyword("from")
-	tblname := p.lex.eatId()
-	var pred Predicate
-	if p.lex.matchKeyword("where") {
-		lex.eatKeyword("where")
-		pred = *p.predicate()
-	}
-	return DeleteData{tblname, pred}
-}
-
-func (p *Parser) insert() InsertData {
-	p.lex.eatKeyword("insert")
-	p.lex.eatKeyword("into")
-	tblname := p.lex.eatId()
-	p.lex.eatDelim('(')
-	fields := p.fieldList()
-	p.lex.eatDelim(')')
-	p.lex.eatKeyword("values")
-	p.lex.eatDelim('(')
-	vals := p.constList()
-	p.lex.eatDelim(')')
-	return InsertData{tblname, fields, vals}
-}
-
-func (p *Parser) fieldList() []string {
-	L := []string{p.field()}
-	if p.lex.matchDelim(',') {
-		p.lex.eatDelim(',')
-		L = append(L, p.fieldList()...)
-	}
-	return L
-}
-
-func (p *Parser) constList() []Constant {
-	L := []Constant{p.constant()}
-	if p.lex.matchDelim(',') {
-		p.lex.eatDelim(',')
-		L = append(L, p.constList()...)
-	}
-	return L
-}
-
-func (p *Parser) modify() ModifyData {
-	p.lex.eatKeyword("update")
-	tblname := p.lex.eatId()
-	p.lex.eatKeyword("set")
-	fldname := p.field()
-	p.lex.eatDelim('=')
-	newval := p.expression()
-	var pred Predicate
-	if p.lex.matchKeyword("where") {
-		p.lex.eatKeyword("where")
-		pred := p.predicate()
-	}
-	return ModifyData{tblname, fldname, newval, pred}
-}
-
-func (p *Parser) createTable() CreateTableData {
-	p.lex.eatKeyword("table")
-	tblname := p.lex.eatId()
-	p.lex.eatDelim('(')
-	sch := p.fieldDefs()
-	p.lex.eatDelim(')')
-	return CreateTableData{tblname, sch}
-}
-
-func (p *Parser) fieldDefs() Schema {
-	schema := p.fieldDef()
-	if p.lex.matchDelim(',') {
-		p.lex.eatDelim(',')
-		sch2 := p.fieldDefs()
-		schema.addAll(sch2)
-	}
-	return schema
-}
-
-func (p *Parser) fieldDef() Schema {
-	fldname := p.field()
-	return p.fieldType(fldname)
-}
-
-func (p *Parser) fieldType(fldname string) Schema {
-	schema := makeSchema()
-	if p.lex.matchKeyword("int") {
-		p.lex.eatKeyword("int")
-		schema.addIntField(fldname)
-	} else {
-		p.lex.eatKeyword("varchar")
-		p.lex.eatDelim('(')
-		strlen := p.lex.eatIntConstant()
-		p.lex.eatDelim(')')
-		schema.addStringField(fldname, strlen)
-	}
-	return schema
-}
-
-func (p *Parser) createView() CreateViewData
-func (p *Parser) createIndex() CreateIndexData

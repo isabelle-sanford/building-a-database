@@ -403,3 +403,39 @@ gonna move on to ch 9 to at least get some stuff done
 
 4:30 well that took a WHILE 
 but everything in ch 9 is written out and should work except for Lexer which will take some more work
+
+
+2/7 9:45pm
+gonna actually properly read ch 8 and 9 now 
+but start with ch 7 exercises of interest: 
+- mostly suggestions of how to handle various potential problems/errors or add new functionality (like dropping a table, removing a field, checking if a client tries to add a table name that already exists)
+- 7.12 (fix stats manager to actually calculate distinct values)
+
+ch 8 reading:
+- gonna have to go back and implement get/setVal for TableScan
+- yeah that's about it 
+
+ch 8 exercises: 
+- fixes (8.4, 8.6, 8.11)
+- additional features: 8.7 (additional datatypes), 8.8 (arithmetic operations on ints), 8.9 (comparison > < operators for terms), 8.10 (and, or, not), 8.12 (make projectScan updatable), 8.14 (rename operator), 8.15 (extend operator, ie add new field), 8.16 (union operator), 8.17 (semijoin / antijoin operators)
+
+tbh didn't get that much from that, I understood it on the skim pretty well. ch 9 will be a different story
+
+10:15 reading ch 9: 
+- ...I'm getting the feeling I'm gonna need to do ch 10 too before the thing is "finished" 
+- maaaybe I don't have to worry about inbuilt tokenizers? nope nvm 
+- also testing is gonna be a pain bc I think I can't properly until 8-10 are done (9 might be individually testable? 8... at least somewhat isn't, I think, but I could be wrong)
+- ok, I understand a lot more what Lexer does now and what I want to find. the question is whether Go has an appropriate- wait
+I just saw that there's a text category in the standard library which I'd missed before and one of its subcategories is 'scanner' which explicitly says it provides a tokenizer! (for UTF-8 which is cool with me)
+
+okay so the things it scans by default are: ident, int, float, char, string, rawstring, comment
+we want: single-character delimiters, ints, strings, keywords, identifiers
+keysowrds and identifiers are recognizable in part via being- probably RawString? but how do I set keywords rather than just use Go's? might have to be manual about it
+what does IsIdentRune do? okay that's cool but by character and would be super annoying sooo 
+remember to check for keywords and to lowercase everything 
+
+....hm 
+might need to use this if Scanner doesn't work: https://github.com/google/shlex/blob/e7afc7fbc510/shlex.go
+
+working on lexer now and honestly very uncertain about most of these methods. PLEASE REMEMBER TO TEST 
+11:30 finished lexer attempt. really hope this works
