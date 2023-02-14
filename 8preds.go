@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	"strings"
+)
 
 type Constant struct {
 	ival  int
@@ -55,7 +58,7 @@ func (c Constant) compare(c1 Constant) int {
 	if c.isInt {
 		return c.ival - c1.ival
 	} else {
-		return c.sval.compare(c1.sval) // HOW TO COMPARE STRINGS
+		return strings.Compare(c.sval, c1.sval)
 	}
 }
 

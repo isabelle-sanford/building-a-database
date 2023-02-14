@@ -93,7 +93,7 @@ func (si *StatInfo) getDistinct(fldname string) int {
 
 // todo tostring for stat info
 
-func main() {
+func StatTest() {
 	db := makeDB()
 	tx := db.makeTx()
 	tm := makeTableMgr(tx, true)

@@ -5,7 +5,7 @@ package main
 type QueryData struct {
 	fields []string
 	tables []string // collection?
-	pred   Predicate
+	pred   *Predicate
 }
 
 func (qd QueryData) String() string {

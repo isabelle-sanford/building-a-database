@@ -1,45 +1,7 @@
 package main
 
-type PredParser struct {
-	lex Lexer
-}
-
 type Parser struct {
 	lex Lexer
-}
-
-func (pp *PredParser) field() {
-	pp.lex.eatId()
-}
-
-func (pp *PredParser) constant() {
-	if pp.lex.matchStringConstant() {
-		pp.lex.matchIntConstant()
-	} else {
-		pp.lex.eatIntConstant()
-	}
-}
-
-func (pp *PredParser) expression() {
-	if pp.lex.matchId() {
-		pp.field()
-	} else {
-		pp.constant()
-	}
-}
-
-func (pp *PredParser) term() {
-	pp.expression()
-	pp.lex.eatDelim('=')
-	pp.expression()
-}
-
-func (pp *PredParser) predicate() {
-	pp.term()
-	if pp.lex.matchKeyword("and") {
-		pp.lex.keyword("and") // ???
-		pp.predicate()
-	}
 }
 
 // PARSER
@@ -50,14 +12,17 @@ func makeParser(s string) Parser {
 }
 
 func (p *Parser) field() string {
-	return p.lex.eatId()
+	ret, _ := p.lex.eatId()
+	return ret
 }
 
 func (p *Parser) constant() Constant {
 	if p.lex.matchStringConstant() {
-		return makeConstString(p.lex.eatStringConstant())
+		ret, _ := p.lex.eatStringConstant()
+		return makeConstString(ret)
 	} else {
-		return makeConstInt(p.lex.eatIntConstant())
+		ret, _ := p.lex.eatIntConstant()
+		return makeConstInt(ret)
 	}
 }
 
@@ -108,7 +73,8 @@ func (p *Parser) selectList() []string {
 }
 
 func (p *Parser) tableList() []string {
-	L := []string{p.lex.eatId()}
+	tl, _ := p.lex.eatId()
+	L := []string{tl}
 	if p.lex.matchDelim(',') {
 		p.lex.eatDelim(',')
 		L = append(L, p.tableList()...)
@@ -131,21 +97,21 @@ func (p *Parser) updateCmd() { // returns something ???
 func (p *Parser) create() { // returns ??
 	p.lex.eatKeyword("create")
 	if p.lex.matchKeyword("table") {
-		return createTable()
+		return p.createTable()
 	} else if p.lex.matchKeyword("view") {
-		return createView() // might not be valid
+		return p.createView() // might not be valid
 	} else {
-		return createIndex() // might not be valid
+		return p.createIndex() // might not be valid
 	}
 }
 
 func (p *Parser) delete() DeleteData {
 	p.lex.eatKeyword("delete")
 	p.lex.eatKeyword("from")
-	tblname := p.lex.eatId()
+	tblname, _ := p.lex.eatId()
 	var pred Predicate
 	if p.lex.matchKeyword("where") {
-		lex.eatKeyword("where")
+		p.lex.eatKeyword("where")
 		pred = *p.predicate()
 	}
 	return DeleteData{tblname, pred}
@@ -154,7 +120,7 @@ func (p *Parser) delete() DeleteData {
 func (p *Parser) insert() InsertData {
 	p.lex.eatKeyword("insert")
 	p.lex.eatKeyword("into")
-	tblname := p.lex.eatId()
+	tblname, _ := p.lex.eatId()
 	p.lex.eatDelim('(')
 	fields := p.fieldList()
 	p.lex.eatDelim(')')
@@ -185,7 +151,7 @@ func (p *Parser) constList() []Constant {
 
 func (p *Parser) modify() ModifyData {
 	p.lex.eatKeyword("update")
-	tblname := p.lex.eatId()
+	tblname, _ := p.lex.eatId()
 	p.lex.eatKeyword("set")
 	fldname := p.field()
 	p.lex.eatDelim('=')
@@ -200,7 +166,7 @@ func (p *Parser) modify() ModifyData {
 
 func (p *Parser) createTable() CreateTableData {
 	p.lex.eatKeyword("table")
-	tblname := p.lex.eatId()
+	tblname, _ := p.lex.eatId()
 	p.lex.eatDelim('(')
 	sch := p.fieldDefs()
 	p.lex.eatDelim(')')
@@ -230,7 +196,7 @@ func (p *Parser) fieldType(fldname string) Schema {
 	} else {
 		p.lex.eatKeyword("varchar")
 		p.lex.eatDelim('(')
-		strlen := p.lex.eatIntConstant()
+		strlen, _ := p.lex.eatIntConstant()
 		p.lex.eatDelim(')')
 		schema.addStringField(fldname, strlen)
 	}

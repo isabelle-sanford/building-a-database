@@ -445,3 +445,45 @@ oh! how to compare two strings lexicographically - use strings.Compare(a, b)
 so there might be a problem with using `` for strings instead of ""? 
 
 12:30 finished and debugged LexerTest func, which... is definitely not sufficient for actual testing honestly, but it's something
+
+
+2/13 8pm reading ch 10 
+8:40 done, nicely modular for optimization later, shouldn't be hard to implement 
+notes on ch 10 exercises: 
+- stability: verification/checking (10.8-12)
+- features: 10.13-18 (following from previous chapters), 10.22 (print queries and plans to the console)
+- improvements: insert from end of table (10.19), allow views in update planning & make them process better (10.20-21)
+
+finished reading 8:45
+
+started reviewing code at 9pm
+what is updateCmd() supposed to return??? it returns 
+- insert()  (InsertData)
+- create()  (Object)
+- delete()  (DeleteData)
+- modify()  (ModifyData)
+
+okay. and create returns... createTable, view, or index. okay. so... actually are those all Scans returned? what does createTable even return? ...nothing. 
+sakdfhlsd the- OKAY COOL we were in fact looking at the wrong createTable, love that 
+so create() returns createTable() (or view or index) which returns CreateTableData(), createindexdata, etc 
+okay so ideally we make all of these grouped under a Data object of some form. which..... is a lil tricky when they're all different inside. hm. q for towell maybe? I think yes. shelving that for now then
+
+sigh. for errors in scans, probably just do the two values thing rather than throwing tbh. I was about to say 'deal with that later' but honestly absolutely deal with it now, obviously. ok.
+fixed that, now checking for consequences...
+and I found none, which is... wild but alright
+I don't remember what/how I tested last time, but gonna push this stuff and start with ch 10
+
+
+9:30pm
+
+
+current problems: 
+- 8preds.go wants nonexistent Plan structs 
+- 9parser.go has updateCmd which wants to return like five different types 
+
+
+QS FOR TOWELL-----
+
+I'm pretty sure I just can't think but - I want a function to return a value that can be of several different struct types (all ultimately labeled some kind of 'Data', like InsertData, CreateTableData, etc). The types are... not very similar (literally the only thing all of them have is 1 string). Should I make a superstruct? an interface? a list of valid types? ??
+
+Tokenizer - splitting keyword vs id better? 

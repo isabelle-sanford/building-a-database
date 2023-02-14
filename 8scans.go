@@ -109,24 +109,34 @@ func (ps *ProjectScan) next() bool {
 	return ps.scn.next()
 }
 
-func (ps *ProjectScan) getInt(fldname string) int {
+func (ps *ProjectScan) getInt(fldname string) (int, bool) {
+	var b bool
 	if ps.hasField(fldname) {
-		return ps.scn.getInt(fldname)
+		b = true
+		return ps.scn.getInt(fldname), b
 	}
+	return -1, b
 	// ! throw runtime exception field not found
 }
 
-func (ps *ProjectScan) getString(fldname string) string {
+func (ps *ProjectScan) getString(fldname string) (string, bool) {
+	var b bool
 	if ps.hasField(fldname) {
-		return ps.scn.getString(fldname)
+		b = true
+		return ps.scn.getString(fldname), b
 	}
+	return "", b
 	// ! throw runtime exception field not found
 }
 
-func (ps *ProjectScan) getVal(fldname string) Constant {
+func (ps *ProjectScan) getVal(fldname string) (Constant, bool) {
+	var b bool
 	if ps.hasField(fldname) {
-		return ps.scn.getVal(fldname)
+		b = true
+		return ps.scn.getVal(fldname), b
 	}
+
+	return Constant{}, b
 	// throw runtime exception
 
 }
