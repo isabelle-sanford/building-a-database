@@ -90,7 +90,9 @@ func (e Expression) evaluate(s Scan) Constant {
 	if e.isConst {
 		return e.val
 	} else {
-		return s.getVal(e.fldname)
+		// optionally pass this along (and have return type const,bool ?)
+		ret, _ := s.getVal(e.fldname)
+		return ret
 	}
 }
 func (e Expression) appliesTo(sch Schema) bool {
@@ -123,7 +125,7 @@ func (t Term) reductionFactor(p Plan) int {
 		lhsName = t.lhs.fldname
 		rhsName = t.rhs.fldname
 		// !
-		return int(math.Max(p.distinctValues(lhsName), p.distinctValues(rhsName)))
+		return int(math.Max(float64(p.distinctValues(lhsName)), float64(p.distinctValues(rhsName))))
 	}
 	if t.lhs.isFieldName() {
 		lhsName = t.lhs.fldname
@@ -242,6 +244,6 @@ func (pred *Predicate) equatesWithField(fldname string) *string {
 	return nil
 }
 
-func (pred *Predicate) String() string {
+// func (pred *Predicate) String() string {
 
-}
+// }

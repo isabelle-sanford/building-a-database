@@ -472,18 +472,35 @@ sigh. for errors in scans, probably just do the two values thing rather than thr
 fixed that, now checking for consequences...
 and I found none, which is... wild but alright
 I don't remember what/how I tested last time, but gonna push this stuff and start with ch 10
+(after renaming everything so 10 is still last alphabetically)
 
 
-9:30pm
+9:30pm starting ch 10 
+
+Uhhh. TableScan doesn't implement Scan, because all its methods are on a pointer. Is that true for all the scans? Can I... fix that? How? That's gonna cause so many problems. Um. I think for now we write and ignore the errors and see if there's a workaround tomorrow. 
+
+okay done for tablescan, now we just do it for all the others! yayyyy
+
+OOH okay so if I return the address of the table it's fine (which makes sense, I'm being returned a pointer but want to return the value). good. that's so much better. also thank GOODNESS for go having excellent error/debugging messages
+updated tablescan to implement Scan properly (adding get and set Val funcs)
+....sigh, in order to not throw errors I have to have all get int/string/const return the thing and a bool, because I have to update scan. unless I just return an empty thing, maybe... this is probably good practice tho
+
+also, project scan has a fieldlist map[string]int vs schema's map[string]FieldInfo. map is only because it's easier / less work for me to figure out if a key is in a list rather than a map. guess I could do sets.... for now, project scan just gets a constructor that changes the fieldinfo to ints i guess. which requires a loop. why amd I doing this again? ...honestly come back to this in the morning with energy 
+okay yeah projectscan now has a list instead of a map. good. 
+
+product scan: fine except that hasField only works on a *Schema, not a Schema, so had to change the schema() func in the Plan interface to return a *Schema. sigh. 
+also nearly made a mistake that would have been VERY painful to fix but is fine 
+
+10:44pm
+table, select, project, and product plans done!
 
 
 current problems: 
 - 8preds.go wants nonexistent Plan structs 
 - 9parser.go has updateCmd which wants to return like five different types 
 
+scan issues: 
+- tablescan doesn't implement scan because it doesn't have the (val, bool) return from the get functions 
+- can't cast to updatescan
 
-QS FOR TOWELL-----
 
-I'm pretty sure I just can't think but - I want a function to return a value that can be of several different struct types (all ultimately labeled some kind of 'Data', like InsertData, CreateTableData, etc). The types are... not very similar (literally the only thing all of them have is 1 string). Should I make a superstruct? an interface? a list of valid types? ??
-
-Tokenizer - splitting keyword vs id better? 

@@ -4,9 +4,9 @@ package main
 type Scan interface {
 	beforeFirst()
 	next() bool
-	getInt(fldname string) int
-	getString(fldname string) string
-	getVal(fldname string) Constant // need to figure out equivalent of "Constant" in go
+	getInt(fldname string) (int, bool)
+	getString(fldname string) (string, bool)
+	getVal(fldname string) (Constant, bool) // need to figure out equivalent of "Constant" in go
 	hasField(fldname string) bool
 	close()
 }
@@ -28,7 +28,7 @@ type UpdateScan interface {
 
 type SelectScan struct {
 	// is this ok? just because SelectScan implements updatescan doesn't mean scn does?
-	scn  UpdateScan // can this be not pointered without problems? interface doesn't work without it
+	scn  Scan // can this be not pointered without problems? interface doesn't work without it
 	pred Predicate
 }
 
@@ -45,15 +45,15 @@ func (ss *SelectScan) next() bool {
 	return false
 }
 
-func (ss *SelectScan) getInt(fldname string) int {
+func (ss *SelectScan) getInt(fldname string) (int, bool) {
 	return ss.scn.getInt(fldname)
 }
 
-func (ss *SelectScan) getString(fldname string) string {
+func (ss *SelectScan) getString(fldname string) (string, bool) {
 	return ss.scn.getString(fldname)
 }
 
-func (ss *SelectScan) getVal(fldname string) Constant {
+func (ss *SelectScan) getVal(fldname string) (Constant, bool) {
 	return ss.scn.getVal(fldname)
 }
 
@@ -67,89 +67,89 @@ func (ss *SelectScan) close() {
 
 // for UpdateScan
 func (ss *SelectScan) setInt(fldname string, val int) {
+	var us UpdateScan = UpdateScan(ss.scn)
 	ss.scn.setInt(fldname, val)
 }
-
 func (ss *SelectScan) setString(fldname string, val string) {
 	ss.scn.setString(fldname, val)
 }
-
 func (ss *SelectScan) setVal(fldname string, val Constant) {
 	ss.scn.setVal(fldname, val)
 }
-
 func (ss *SelectScan) delete() {
 	ss.scn.delete()
 }
-
 func (ss *SelectScan) insert() {
 	ss.scn.insert()
 }
-
 func (ss *SelectScan) getRID() {
 	ss.scn.getRID()
 }
-
 func (ss *SelectScan) moveToRID(rid RID) {
 	ss.scn.moveToRID(rid)
 }
 
-// PROJECT SCAN
+// PROJECT SCAN---------------------------------
 
 type ProjectScan struct {
-	scn       Scan           // can this be not pointered without problems? interface doesn't work without it
-	fieldlist map[string]int // slice vs map ?
+	scn       Scan     // can this be not pointered without problems? interface doesn't work without it
+	fieldlist []string // slice vs map ?
+}
+
+func makeProjectScan(scn Scan, fields map[string]FieldInfo) ProjectScan {
+
 }
 
 func (ps *ProjectScan) beforeFirst() {
 	ps.scn.beforeFirst()
 }
-
 func (ps *ProjectScan) next() bool {
 	return ps.scn.next()
 }
-
 func (ps *ProjectScan) getInt(fldname string) (int, bool) {
 	var b bool
 	if ps.hasField(fldname) {
 		b = true
-		return ps.scn.getInt(fldname), b
+		ret, _ := ps.scn.getInt(fldname)
+		return ret, b
 	}
 	return -1, b
 	// ! throw runtime exception field not found
 }
-
 func (ps *ProjectScan) getString(fldname string) (string, bool) {
 	var b bool
 	if ps.hasField(fldname) {
 		b = true
-		return ps.scn.getString(fldname), b
+		ret, _ := ps.scn.getString(fldname)
+		return ret, b
 	}
 	return "", b
 	// ! throw runtime exception field not found
 }
-
 func (ps *ProjectScan) getVal(fldname string) (Constant, bool) {
 	var b bool
 	if ps.hasField(fldname) {
 		b = true
-		return ps.scn.getVal(fldname), b
+		ret, _ := ps.scn.getVal(fldname)
+		return ret, b
 	}
 
 	return Constant{}, b
 	// throw runtime exception
-
 }
-
 func (ps *ProjectScan) hasField(fldname string) bool {
-	_, ok := ps.fieldlist[fldname]
-	return ok
+	for _, k := range ps.fieldlist {
+		if k == fldname {
+			return true
+		}
+	}
+	return false
 }
-
 func (ps *ProjectScan) close() {
 	ps.scn.close()
 }
 
+// PRODUCT SCAN---------------------------------
 type ProductScan struct {
 	s1 Scan
 	s2 Scan
@@ -170,7 +170,7 @@ func (ps *ProductScan) next() bool {
 	}
 }
 
-func (ps *ProductScan) getInt(fldname string) int {
+func (ps *ProductScan) getInt(fldname string) (int, bool) {
 	if ps.s1.hasField(fldname) {
 		return ps.s1.getInt(fldname)
 	} else {
@@ -179,7 +179,7 @@ func (ps *ProductScan) getInt(fldname string) int {
 	// ! throw runtime exception field not found
 }
 
-func (ps *ProductScan) getString(fldname string) string {
+func (ps *ProductScan) getString(fldname string) (string, bool) {
 	if ps.s1.hasField(fldname) {
 		return ps.s1.getString(fldname)
 	} else {
@@ -187,7 +187,7 @@ func (ps *ProductScan) getString(fldname string) string {
 	}
 }
 
-func (ps *ProductScan) getVal(fldname string) Constant {
+func (ps *ProductScan) getVal(fldname string) (Constant, bool) {
 	if ps.s1.hasField(fldname) {
 		return ps.s1.getVal(fldname)
 	} else {

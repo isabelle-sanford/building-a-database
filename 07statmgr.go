@@ -36,6 +36,7 @@ func makeStatMgr(tm *TableMgr, tx *Transaction) StatMgr {
 
 // might need layout arg? not sure why tho
 // don't even really need tx
+// ! also maybe doesn't need to be pointered?
 func (sm *StatMgr) getStatInfo(tblname string, layout Layout, tx *Transaction) *StatInfo {
 	sm.numcalls++
 	if sm.numcalls > 100 {

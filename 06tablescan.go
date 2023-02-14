@@ -44,7 +44,7 @@ func (t *TableScan) close() {
 }
 
 // puts currslot / recordpage to first record in file
-func (t *TableScan) beforeFirst() {
+func (t TableScan) beforeFirst() {
 	t.moveToBlock(0)
 }
 
@@ -91,15 +91,28 @@ func (t *TableScan) insert() {
 	t.currslot = newslot
 }
 
-// func (t *TableScan) getVal(fldname string) {
+func (t *TableScan) getVal(fldname string) Constant {
 
-// 	typ := t.layout.schema.fields[fldname]
-// 	if typ.fldtype == INTEGER {
-// 		val := t.rp.getInt(t.currslot, fldname)
-// 	} else if typ.fldtype == VARCHAR {
-// 		val := t.rp.getString(t.currslot, fldname)
-// 	}
-// }
+	typ := t.layout.schema.fields[fldname]
+	if typ.fldtype == INTEGER {
+		val := t.rp.getInt(t.currslot, fldname)
+		return makeConstInt(val)
+	} else if typ.fldtype == VARCHAR {
+		val := t.rp.getString(t.currslot, fldname)
+		return makeConstString(val)
+	} else {
+		return Constant{} // i guess
+	}
+}
+func (t *TableScan) setVal(fldname string, val Constant) {
+	typ := t.layout.schema.fields[fldname]
+	if typ.fldtype == INTEGER {
+		t.rp.setInt(t.currslot, fldname, val.ival)
+
+	} else if typ.fldtype == VARCHAR {
+		t.rp.setString(t.currslot, fldname, val.sval)
+	}
+}
 
 func (t *TableScan) getInt(fldname string) int {
 	return t.rp.getInt(t.currslot, fldname)
