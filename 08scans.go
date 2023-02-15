@@ -67,26 +67,32 @@ func (ss *SelectScan) close() {
 
 // for UpdateScan
 func (ss *SelectScan) setInt(fldname string, val int) {
-	var us UpdateScan = UpdateScan(ss.scn)
-	ss.scn.setInt(fldname, val)
+	us := ss.scn.(UpdateScan)
+	us.setInt(fldname, val)
 }
 func (ss *SelectScan) setString(fldname string, val string) {
-	ss.scn.setString(fldname, val)
+	us := ss.scn.(UpdateScan)
+	us.setString(fldname, val)
 }
 func (ss *SelectScan) setVal(fldname string, val Constant) {
-	ss.scn.setVal(fldname, val)
+	us := ss.scn.(UpdateScan)
+	us.setVal(fldname, val)
 }
 func (ss *SelectScan) delete() {
-	ss.scn.delete()
+	us := ss.scn.(UpdateScan)
+	us.delete()
 }
 func (ss *SelectScan) insert() {
-	ss.scn.insert()
+	us := ss.scn.(UpdateScan)
+	us.insert()
 }
 func (ss *SelectScan) getRID() {
-	ss.scn.getRID()
+	us := ss.scn.(UpdateScan)
+	us.getRID()
 }
 func (ss *SelectScan) moveToRID(rid RID) {
-	ss.scn.moveToRID(rid)
+	us := ss.scn.(UpdateScan)
+	us.moveToRID(rid)
 }
 
 // PROJECT SCAN---------------------------------
@@ -94,10 +100,6 @@ func (ss *SelectScan) moveToRID(rid RID) {
 type ProjectScan struct {
 	scn       Scan     // can this be not pointered without problems? interface doesn't work without it
 	fieldlist []string // slice vs map ?
-}
-
-func makeProjectScan(scn Scan, fields map[string]FieldInfo) ProjectScan {
-
 }
 
 func (ps *ProjectScan) beforeFirst() {

@@ -244,6 +244,6 @@ func (pred *Predicate) equatesWithField(fldname string) *string {
 	return nil
 }
 
-// func (pred *Predicate) String() string {
-
-// }
+func (pred *Predicate) String() string {
+	return "YOU SHOULD FILL IN THAT STRING PREDICATE FUNCTION HUH"
+}

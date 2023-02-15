@@ -26,18 +26,21 @@ func (qd QueryData) String() string {
 	return result
 }
 
-type InsertData struct {
+// ?? i guess
+type UpdateData interface{}
+
+type InsertData struct { // tableName, fields, vals
 	tblname string
 	flds    []string
 	vals    []Constant
 }
 
-type DeleteData struct {
+type DeleteData struct { // tableName, pred
 	tblname string
 	pred    Predicate
 }
 
-type ModifyData struct {
+type ModifyData struct { // tableName, targetField, newValue, pred
 	tblname string
 	fldname string
 	newval  Expression
@@ -52,6 +55,11 @@ type CreateTableData struct {
 type CreateViewData struct {
 	viewname string
 	qrdata   QueryData
+}
+
+// could make all getters funcs like this?
+func (cvw CreateViewData) viewDef() string {
+	return cvw.qrdata.String()
 }
 
 type CreateIndexData struct {

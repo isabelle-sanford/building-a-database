@@ -82,26 +82,26 @@ func (p *Parser) tableList() []string {
 	return L
 }
 
-func (p *Parser) updateCmd() { // returns something ???
+func (p *Parser) updateCmd() (UpdateData, string) { // basically returns Object
 	if p.lex.matchKeyword("insert") {
-		return p.insert()
+		return p.insert(), "insert"
 	} else if p.lex.matchKeyword("delete") {
-		return p.delete()
+		return p.delete(), "delete"
 	} else if p.lex.matchKeyword("update") {
-		return p.modify()
+		return p.modify(), "modify"
 	} else {
 		return p.create()
 	}
 }
 
-func (p *Parser) create() { // returns ??
+func (p *Parser) create() (UpdateData, string) { // returns ??
 	p.lex.eatKeyword("create")
 	if p.lex.matchKeyword("table") {
-		return p.createTable()
+		return p.createTable(), "createTable"
 	} else if p.lex.matchKeyword("view") {
-		return p.createView() // might not be valid
+		return p.createView(), "createView" // might not be valid
 	} else {
-		return p.createIndex() // might not be valid
+		return p.createIndex(), "createIndex" // might not be valid
 	}
 }
 
@@ -203,5 +203,5 @@ func (p *Parser) fieldType(fldname string) Schema {
 	return schema
 }
 
-func (p *Parser) createView() CreateViewData
-func (p *Parser) createIndex() CreateIndexData
+func (p *Parser) createView() *CreateViewData
+func (p *Parser) createIndex() *CreateIndexData

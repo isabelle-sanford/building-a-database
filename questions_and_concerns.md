@@ -32,4 +32,6 @@ Conversion between UpdateScan and Scan inside of SelectScan - can I tell if a pa
 
 
 
-TODO FOR GEOFF
+## important feature notes/limitations
+
+- SQL subset does not allow: computation, sorting, grouping, nesting, renaming, * operator

@@ -494,6 +494,8 @@ also nearly made a mistake that would have been VERY painful to fix but is fine
 10:44pm
 table, select, project, and product plans done!
 
+next question: is BasicQueryPlanner used somewhere? Or is it just an example prior to Planner? I genuinely can't tell which I do not love. I thiiink it is tho? guess I'll figure it out (tomorrow)
+
 
 current problems: 
 - 8preds.go wants nonexistent Plan structs 
@@ -504,3 +506,41 @@ scan issues:
 - can't cast to updatescan
 
 
+2/14
+met with geoff 1-2
+notes: 
+- for returning Object - return a pointer to a nil interface, as long as you can know the type on the other side (or return a second thing identifying type)
+- use package unsafe for casting to updatescan 
+- DRAW PICTURES (try dbdiagram?)
+
+6pm
+let's finish up chapter 10 okay? 
+first thing is to understand how these things actually fit together
+maybe we DO make diagram for ch 8-10? first just read and try tho
+
+So the planner for simpleDB ordering is: 
+- make plan for each table 
+- take the product of all the tables (in order given - ish?)
+- select on the stuff in the where clause
+- project the columns in the select clause 
+- output 
+
+6:30 finished BasicQueryPlanner (with little added optimization thingy)
+
+hm. next is BasicUpdatePlanner but I thiiink it's not subdivided, the different things are just different functions? So it might fail but I'm gonna at least write it out 
+
+once done with this, go back to Data definitions and find targetField under modifyData - ok fixed 
+yeah basic update planner is ... other than the previous update problems it's fine so that's cool. also added create viewdata and indexdata back to metadata manager as just signatures so go is happy
+
+okay, so the planner class seems like it's just a tiny wrapper for the BQP/BUP - or no. it's a wrapper for the query and update planners you choose; you can switch out BQP and/or BUP anytime for better things. it's a wrapper for *some* QP and UP
+oh my god I want to draw this so bad
+okay now dealing with the updateCmd bit sigh
+...actually. I guess I could just make a data interface with those three getters - no wait, that's plans, not data. skfhdkjha
+that said I'm making the interface be called UpdateData 
+Maybe I could make it just a type...? or a struct? anonymous? 
+wait okay the nil pointer thing DID work (basically an empty interface is implemented by just literally everything). now gotta actually convey the type over to the planner. ...is doing that with a string awful? it's a little more work than a number, I guess, but I think right now the clarity is worth it. cool. sigh.
+
+okay what's type assertion - OOOOOH okay actually this is EXACTLY what i needed jsakfdhsdjkhfkd
+okay well the updateScan problem is fixed!!!! and so is this one and I used a switch statement! YAY 
+
+ok planner class done at 7:15.. and that's the end of chapter 10!!
