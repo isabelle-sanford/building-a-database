@@ -8,18 +8,20 @@ type TableMgr struct {
 	fldcat Layout // ??
 }
 
-type tblInfo struct {
-	tblname  string
-	slotsize int
-}
+// tbh maybe rename these to tblCatInfo or something, is just layouts
+// or just remove them, i don't think they actually get used anywhere? doesn't seem like it
+// type tblInfo struct {
+// 	tblname  string
+// 	slotsize int
+// }
 
-type fldInfo struct {
-	tblname string
-	fldname string
-	fldtype int
-	length  int
-	offset  int
-}
+// type fldInfo struct {
+// 	tblname string
+// 	fldname string
+// 	fldtype int
+// 	length  int
+// 	offset  int
+// }
 
 const MAX_NAME_LEN = 20
 

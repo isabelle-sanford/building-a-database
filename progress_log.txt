@@ -619,5 +619,7 @@ todo:
 - make print table method in tablemgr / metadatamgr 
 - diagram all the stuff 
 - write the extended abstract lol
+- figure out how the log package works, seriously
 
-ending at 9:40
+ending at 9:40 - nope wait i'm updating structref so I can draw diagrams, then copying it elsewhere and CLOSING VSCODE 
+ending at 9:45
