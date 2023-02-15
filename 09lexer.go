@@ -112,7 +112,7 @@ func (l *Lexer) nextToken() {
 }
 
 // page 243
-func main() {
+func lexerTest() {
 	x := ""
 	y := 0
 	ok := true

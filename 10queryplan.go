@@ -26,6 +26,38 @@ type Planner struct {
 	up UpdatePlanner
 }
 
+// PLANNER
+func (pl Planner) createQueryPlan(cmd string, tx *Transaction) Plan {
+	parser := makeParser(cmd)
+	data := parser.query()
+	// code to verify query should go here
+	return pl.qp.createPlan(data, tx)
+}
+func (pl Planner) executeUpdate(cmd string, tx *Transaction) int {
+	parser := makeParser(cmd)
+	obj, typ := parser.updateCmd() // HMPH
+	// code to verify update cmd goes here
+
+	switch typ {
+	case "insert":
+		return pl.up.executeInsert(obj.(InsertData), tx)
+	case "delete":
+		return pl.up.executeDelete(obj.(DeleteData), tx)
+	case "modify":
+		return pl.up.executeModify(obj.(ModifyData), tx)
+	case "createTable":
+		return pl.up.executeCreateTable(obj.(CreateTableData), tx)
+	case "createView":
+		return pl.up.executeCreateView(obj.(CreateViewData), tx)
+	case "createIndex":
+		return pl.up.executeCreateIndex(obj.(CreateIndexData), tx)
+	default:
+		return 0 // should never happen
+	}
+
+}
+
+// QUERY PLANNER
 // not pointering is ok right?
 func (bqp BasicQueryPlanner) createPlan(data QueryData, tx *Transaction) Plan {
 	plans := make([]Plan, 1)
@@ -109,34 +141,4 @@ func (bup BasicUpdatePlanner) executeCreateView(data CreateViewData, tx *Transac
 func (bup BasicUpdatePlanner) executeCreateIndex(data CreateIndexData, tx *Transaction) int {
 	bup.mdm.createIndex(data.idxname, data.tblname, data.fldname, tx)
 	return 0
-}
-
-func (pl Planner) createQueryPlan(cmd string, tx *Transaction) Plan {
-	parser := makeParser(cmd)
-	data := parser.query()
-	// code to verify query should go here
-	return pl.qp.createPlan(data, tx)
-}
-func (pl Planner) executeUpdate(cmd string, tx *Transaction) int {
-	parser := makeParser(cmd)
-	obj, typ := parser.updateCmd() // HMPH
-	// code to verify update cmd goes here
-
-	switch typ {
-	case "insert":
-		return pl.up.executeInsert(obj.(InsertData), tx)
-	case "delete":
-		return pl.up.executeDelete(obj.(DeleteData), tx)
-	case "modify":
-		return pl.up.executeModify(obj.(ModifyData), tx)
-	case "createTable":
-		return pl.up.executeCreateTable(obj.(CreateTableData), tx)
-	case "createView":
-		return pl.up.executeCreateView(obj.(CreateViewData), tx)
-	case "createIndex":
-		return pl.up.executeCreateIndex(obj.(CreateIndexData), tx)
-	default:
-		return 0 // should never happen
-	}
-
 }

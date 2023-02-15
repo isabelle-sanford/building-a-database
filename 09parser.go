@@ -203,5 +203,9 @@ func (p *Parser) fieldType(fldname string) Schema {
 	return schema
 }
 
-func (p *Parser) createView() *CreateViewData
-func (p *Parser) createIndex() *CreateIndexData
+func (p *Parser) createView() *CreateViewData {
+	return nil
+}
+func (p *Parser) createIndex() *CreateIndexData {
+	return nil
+}

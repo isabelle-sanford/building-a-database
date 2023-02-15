@@ -39,7 +39,7 @@ func myMin(a int, b int) int {
 func makeTablePlan(tx *Transaction, tblname string, md MetadataMgr) TablePlan {
 	layout := md.getLayout(tblname, tx)
 	si := md.getStatInfo(tblname, layout, tx)
-	return TablePlan{tx, tblname, layout, si}
+	return TablePlan{tx, tblname, layout, &si}
 }
 
 func (tp TablePlan) open() Scan {

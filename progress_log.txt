@@ -556,3 +556,19 @@ Okay, tablescan now uses getRid instead of currentRid, and its get functions all
 ...actually I found nothing? which is a little scary but. okay cool. 
 WAIT NO ok tablemanager has some problems. not big and easily fixable but I'm glad I found SOMETHING ngl
 I CANNOT emphasize how nice Go's error checking is. it's saved sooooo much pain 
+
+7:45 done and pushed! yay! 
+
+Next step is actually making it work. Which... is gonna be painful. So I'm going to get a (SMALL) start on it now so it's slightly less terrifying, and then stop and do other stuff because that's important too.
+I guess we..... try an insert and see what happens? Or I guess create a table first. This is going to go so badly and my logging is NOT good enough to figure out what happened. 
+
+notes as I go: will it recognize upper and lower case sql? or just one? 
+
+okay, so it won't let me just have function signatures. that's fair tbh.
+....also I just realized that MetadataMgr won't work at all because anonymous structs don't inherit methods. yay
+oh my god it did something 
+what it did was print random stuff I haven't yet commented out 
+also this would be a GREAT time to have logs >:(
+
+...I guess try and insert and see if it freaks out? 
+note: remember to test exact same thing with and without spaces between everything once it's definitely functioning
