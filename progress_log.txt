@@ -544,3 +544,15 @@ okay what's type assertion - OOOOOH okay actually this is EXACTLY what i needed 
 okay well the updateScan problem is fixed!!!! and so is this one and I used a switch statement! YAY 
 
 ok planner class done at 7:15.. and that's the end of chapter 10!!
+
+fixing tablescan to match interface - 
+moveToRid was renamed to moveToRID, didn't find any other references so should be fine? 
+....wait. this naming isn't actually my fault, that's how tablescan is named. or - the api has currentRid() and the code has getRid() (which does match up) - and actually they consistently use Rid not RID so that is right. hmph. okay it is my fault then 
+also Rid probably makes more sense bc it's record id, not an acronym. 
+Okay, changed RID -> Rid in SelectScan funcs and UpdateScan interface def. gonna leave moveToRid the same but change currentRID for getRid - appears also in a couple other places here and once in stats manager
+oh. it's just in the test parts 
+
+Okay, tablescan now uses getRid instead of currentRid, and its get functions all return val, bool - which is gonna cause problems so let's go through everything else real quick
+...actually I found nothing? which is a little scary but. okay cool. 
+WAIT NO ok tablemanager has some problems. not big and easily fixable but I'm glad I found SOMETHING ngl
+I CANNOT emphasize how nice Go's error checking is. it's saved sooooo much pain 

@@ -20,8 +20,8 @@ type UpdateScan interface {
 	insert()
 	delete()
 
-	getRID() RID
-	moveToRID(rid RID)
+	getRid() RID
+	moveToRid(rid RID)
 }
 
 // SELECT SCAN
@@ -86,13 +86,13 @@ func (ss *SelectScan) insert() {
 	us := ss.scn.(UpdateScan)
 	us.insert()
 }
-func (ss *SelectScan) getRID() {
+func (ss *SelectScan) getRid() {
 	us := ss.scn.(UpdateScan)
-	us.getRID()
+	us.getRid()
 }
-func (ss *SelectScan) moveToRID(rid RID) {
+func (ss *SelectScan) moveToRid(rid RID) {
 	us := ss.scn.(UpdateScan)
-	us.moveToRID(rid)
+	us.moveToRid(rid)
 }
 
 // PROJECT SCAN---------------------------------

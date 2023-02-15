@@ -234,7 +234,7 @@ func bufferTest() {
 	fmt.Println(bm.bufferpool[2])
 	fmt.Println(buff0)
 
-	fmt.Println("Buffer testing complete\n")
+	fmt.Println("Buffer testing complete")
 
 }
 

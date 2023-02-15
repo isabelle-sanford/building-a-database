@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"strings"
 )
@@ -66,7 +67,7 @@ func (c Constant) compare(c1 Constant) int {
 
 func (c Constant) String() string {
 	if c.isInt {
-		return string(c.ival)
+		return fmt.Sprint(c.ival)
 	} else {
 		return c.sval
 	}

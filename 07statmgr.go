@@ -59,7 +59,7 @@ func (sm *StatMgr) refreshStatistics(tx *Transaction) {
 	tcat := makeTableScan(tx, "tblcat", sm.tm.tblcat) // probably shouldn't hard-code like that
 
 	for tcat.next() {
-		tblname := tcat.getString("tblname")
+		tblname, _ := tcat.getString("tblname")
 		layout := sm.tm.getLayout(tblname, tx)
 		si := calcTableStats(tblname, layout, tx)
 		sm.tableStats[tblname] = si
@@ -78,7 +78,7 @@ func calcTableStats(tblname string, layout Layout, tx *Transaction) StatInfo {
 
 	for tbl.next() {
 		numrecs++
-		numblocks = tbl.currentRID().blknum + 1 // plus 1 for zero-indexing
+		numblocks = tbl.getRid().blknum + 1 // plus 1 for zero-indexing
 	}
 
 	distincts := make(map[string]int) // todo

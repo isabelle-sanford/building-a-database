@@ -72,6 +72,52 @@ func (t *TableScan) moveToRid(r RID) {
 	}
 }
 
+func (t *TableScan) getVal(fldname string) (Constant, bool) {
+
+	typ := t.layout.schema.fields[fldname]
+	if typ.fldtype == INTEGER {
+		val := t.rp.getInt(t.currslot, fldname)
+		return makeConstInt(val), true
+	} else if typ.fldtype == VARCHAR {
+		val := t.rp.getString(t.currslot, fldname)
+		return makeConstString(val), true
+	} else {
+		return Constant{}, false // i guess
+	}
+}
+func (t *TableScan) setVal(fldname string, val Constant) {
+	typ := t.layout.schema.fields[fldname]
+	if typ.fldtype == INTEGER {
+		t.rp.setInt(t.currslot, fldname, val.ival)
+
+	} else if typ.fldtype == VARCHAR {
+		t.rp.setString(t.currslot, fldname, val.sval)
+	}
+}
+
+func (t *TableScan) getInt(fldname string) (int, bool) {
+	return t.rp.getInt(t.currslot, fldname), true // i guess
+}
+func (t *TableScan) getString(fldname string) (string, bool) {
+	return t.rp.getString(t.currslot, fldname), true
+}
+func (t *TableScan) setInt(fldname string, val int) {
+	t.rp.setInt(t.currslot, fldname, val)
+}
+func (t *TableScan) setString(fldname string, val string) {
+	t.rp.setString(t.currslot, fldname, val)
+}
+
+func (t *TableScan) hasField(fldname string) bool {
+	return t.layout.schema.hasField(fldname)
+}
+
+func (t *TableScan) getRid() RID {
+	return RID{int(t.rp.blk.blknum), t.currslot}
+}
+func (t *TableScan) delete() {
+	t.rp.delete(t.currslot)
+}
 func (t *TableScan) insert() {
 	//fmt.Println("Looking at currblock ", t.rp.blk)
 	newslot := t.rp.insertAfter(t.currslot)
@@ -89,53 +135,6 @@ func (t *TableScan) insert() {
 	//fmt.Println("Setting currslot to ", newslot)
 
 	t.currslot = newslot
-}
-
-func (t *TableScan) getVal(fldname string) Constant {
-
-	typ := t.layout.schema.fields[fldname]
-	if typ.fldtype == INTEGER {
-		val := t.rp.getInt(t.currslot, fldname)
-		return makeConstInt(val)
-	} else if typ.fldtype == VARCHAR {
-		val := t.rp.getString(t.currslot, fldname)
-		return makeConstString(val)
-	} else {
-		return Constant{} // i guess
-	}
-}
-func (t *TableScan) setVal(fldname string, val Constant) {
-	typ := t.layout.schema.fields[fldname]
-	if typ.fldtype == INTEGER {
-		t.rp.setInt(t.currslot, fldname, val.ival)
-
-	} else if typ.fldtype == VARCHAR {
-		t.rp.setString(t.currslot, fldname, val.sval)
-	}
-}
-
-func (t *TableScan) getInt(fldname string) int {
-	return t.rp.getInt(t.currslot, fldname)
-}
-func (t *TableScan) getString(fldname string) string {
-	return t.rp.getString(t.currslot, fldname)
-}
-func (t *TableScan) setInt(fldname string, val int) {
-	t.rp.setInt(t.currslot, fldname, val)
-}
-func (t *TableScan) setString(fldname string, val string) {
-	t.rp.setString(t.currslot, fldname, val)
-}
-
-func (t *TableScan) hasField(fldname string) bool {
-	return t.layout.schema.hasField(fldname)
-}
-
-func (t *TableScan) currentRID() RID {
-	return RID{int(t.rp.blk.blknum), t.currslot}
-}
-func (t *TableScan) delete() {
-	t.rp.delete(t.currslot)
 }
 
 // aux
@@ -181,7 +180,7 @@ func (ts *TableScan) printRecord() string {
 	for _, fldname := range ts.layout.schema.fieldlist {
 		fld := ts.rp.layout.schema.fields[fldname]
 		if fld.fldtype == VARCHAR {
-			val = ts.getString(fldname)
+			val, _ = ts.getString(fldname)
 		} else {
 			val = fmt.Sprint(ts.getInt(fldname))
 		}
@@ -197,7 +196,7 @@ func (ts *TableScan) printSingleRecord() {
 	for _, fldname := range ts.layout.schema.fieldlist {
 		fld := ts.layout.schema.fields[fldname]
 		if fld.fldtype == VARCHAR {
-			val = ts.getString(fldname)
+			val, _ = ts.getString(fldname)
 		} else {
 			val = fmt.Sprint(ts.getInt(fldname))
 		}
@@ -240,7 +239,7 @@ func tableScanTest() {
 		n := rand.Intn(50)
 		ts.setInt("A", n)
 		ts.setString("B", fmt.Sprint("rec", n))
-		fmt.Printf("Inserting into slot %v: {%d, %s%d}\n", ts.currentRID(), n, "rec", n)
+		fmt.Printf("Inserting into slot %v: {%d, %s%d}\n", ts.getRid(), n, "rec", n)
 	}
 
 	//fmt.Println(ts.rp.tx.bufflist.buffers[BlockId{"NewT.tbl", 0}].pg)
@@ -249,11 +248,11 @@ func tableScanTest() {
 	count := 0
 	ts.beforeFirst()
 	for ts.next() {
-		a := ts.getInt("A")
-		b := ts.getString("B")
+		a, _ := ts.getInt("A")
+		b, _ := ts.getString("B")
 		if a < 25 {
 			count++
-			fmt.Printf("Slot %v: {%d, %s}\n", ts.currentRID(), a, b)
+			fmt.Printf("Slot %v: {%d, %s}\n", ts.getRid(), a, b)
 			ts.delete()
 		}
 	}
@@ -262,9 +261,9 @@ func tableScanTest() {
 	fmt.Println("Here are the remining records.")
 	ts.beforeFirst()
 	for ts.next() {
-		a := ts.getInt("A")
-		b := ts.getString("B")
-		fmt.Printf("Slot %v: {%d, %s}\n", ts.currentRID(), a, b)
+		a, _ := ts.getInt("A")
+		b, _ := ts.getString("B")
+		fmt.Printf("Slot %v: {%d, %s}\n", ts.getRid(), a, b)
 	}
 
 	ts.close()

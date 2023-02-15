@@ -78,13 +78,13 @@ func (tm *TableMgr) getLayout(tblname string, tx *Transaction) Layout {
 
 	for fcat.next() {
 		// tblname of row
-		tbl := fcat.getString("tblname")
+		tbl, _ := fcat.getString("tblname")
 
 		// if this field is in the table we're finding
 		if tbl == tblname { // this is ok right?
-			fldname := fcat.getString("fldname")
-			fldtype := fcat.getInt("fldtype")
-			fldlen := fcat.getInt("length")
+			fldname, _ := fcat.getString("fldname")
+			fldtype, _ := fcat.getInt("fldtype")
+			fldlen, _ := fcat.getInt("length")
 			sch.addField(fldname, fldtype, fldlen)
 		}
 	}
@@ -158,8 +158,8 @@ func CatalogTest() {
 
 	fmt.Println("\nAll tables and their lengths:")
 	for tCat.next() {
-		tname := tCat.getString("tblname")
-		tsize := tCat.getInt("slotsize")
+		tname, _ := tCat.getString("tblname")
+		tsize, _ := tCat.getInt("slotsize")
 		fmt.Println(tname, " ", tsize)
 	}
 	tCat.close()
@@ -170,9 +170,9 @@ func CatalogTest() {
 	fmt.Println("\nAll fields and their offsets:")
 	for fCat.next() {
 
-		tname := fCat.getString("tblname")
-		fname := fCat.getString("fldname")
-		offset := fCat.getInt("offset")
+		tname, _ := fCat.getString("tblname")
+		fname, _ := fCat.getString("fldname")
+		offset, _ := fCat.getInt("offset")
 		fmt.Printf("Table: %s Field: %s Offset: %d \n", tname, fname, offset)
 		//fmt.Println(tname, " ", fname, " ", offset)
 	}

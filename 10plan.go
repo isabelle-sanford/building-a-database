@@ -90,9 +90,9 @@ func (sp SelectPlan) schema() *Schema {
 func makeProjectPlan(p Plan, fieldlist []string) ProjectPlan {
 	s := makeSchema()
 	for _, fldname := range fieldlist {
-		s.add(fldname, p.schema())
+		s.add(fldname, *p.schema())
 	}
-	return ProjectPlan{p, s}
+	return ProjectPlan{p, &s}
 }
 
 func (pp ProjectPlan) open() Scan {
