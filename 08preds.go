@@ -30,7 +30,7 @@ const INT_MAX_VAL = 90000000 // !!
 
 // CONSTANT
 func makeConstInt(ival int) Constant {
-	return Constant{ival: ival}
+	return Constant{ival: ival, isInt: true}
 }
 
 func makeConstString(sval string) Constant {

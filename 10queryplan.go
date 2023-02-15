@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type QueryPlanner interface {
 	createPlan(data QueryData, tx *Transaction) Plan
 }
@@ -35,8 +37,14 @@ func (pl Planner) createQueryPlan(cmd string, tx *Transaction) Plan {
 }
 func (pl Planner) executeUpdate(cmd string, tx *Transaction) int {
 	parser := makeParser(cmd)
+
+	// fmt.Println("\nparser pre-parse:\n", parser.lex)
+
 	obj, typ := parser.updateCmd() // HMPH
 	// code to verify update cmd goes here
+
+	fmt.Println("\nupdate is", obj, typ)
+	// fmt.Println("\nparser post-update:\n", parser.lex)
 
 	switch typ {
 	case "insert":

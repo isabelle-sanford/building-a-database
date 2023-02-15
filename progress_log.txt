@@ -572,3 +572,52 @@ also this would be a GREAT time to have logs >:(
 
 ...I guess try and insert and see if it freaks out? 
 note: remember to test exact same thing with and without spaces between everything once it's definitely functioning
+also it's still not putting files into a directory like I want
+Somewhat worryingly, I don't see a table1.tbl, so.... that might not be great. How about instead of trying to insert, we try and print the table catalog? HEYYY it's in there! that's good news! With a couple extra things I don't understand, so... 
+
+FIXING CATALOG PRINTS (-> BAD SCHEMAS)
+show table cat goes to printTable goes to printRecord which ... seems fine? weird. let's print field catalog too. okay it's functional and doesn't show that extra stuff as columns and I vaaaaguely remember this
+So... I'm printing "true" after every integer. OHH okay okay i see. it's because of me. ok. cool. amazing, much better. there is still a 0 at the start of them all which I do not love but...? There clearly isn't an actual field there, or the field catalog would print it. 
+does the fieldlist start with a 0??
+just checked for stray prints and found none
+
+okay! so the schema in the layout looks like map[:8 slotsize:44 tblname:16]. cool. why? ...I wonder if it's that I'm initializing it at cappacity one. hm. I mean.... probably not? and only doing it for the fieldlist, not the fields (which is what I'm using here) ...well, I tried it and it fixed it. yay? I mean, I see why that does make an empty thing at the start of fieldlist. maybe I was using that? oh yup. sure was. cooool
+
+INSERTING---
+Okay, so now the table catalogs are correct. Let's try inserting again! (but also istg if you're working on this past nine you need to stopppp) and we get a panic. great. I thiiiink what it's telling me (it's an index 1 out of range length 1 in executeInsert) is that it's not allocating new space. probably. maybe. might be further up. 
+it prints an obj surprisingly well 
+:o I can make the file sidebar on the right side of the screen?! 
+anyway so when I try to print the InsertData object, it gives me
+   {table1 [COL1 COL2] [{0  false}]} insert
+so everything is fine except the actual values (trying to insert 'Hello' , 20). so it's a parser problem probably. woooooo. no wait it's supposed to be a list of constants, but {0 false} is just a null constant. which I'm probably returning somewhere. sigh. okay. So the trace is: 
+
+executeUpdate(insertQuery, tx):
+- makes a parser 
+- asks the parser for an InsertData object 
+- tries to run executeInsert, which fails - probably because the vals attribute (a []Constant) is empty. 
+
+1) Does the parser initialize right?
+2) Does the parser process the InsertData right? 
+
+THE QUERY IS:
+insert into table1 ( COL1 , COL2 ) values ( 'Hello' , 20 )
+
+one of those must be false. ...printing the parser was a bad idea lol. ok so a parser just holds a lexer. so we're actually printing a lexer, does that initialize right? lexer has a map of keywords, which does print correctly. then it has a token, and then a rune. ...oh, I'm doing this for table creation too. sigh. also the parser initializes with a specific string, so it constructs a lexer which initializes a scanner and the currTok which is right before the start ig? also the parser string thingy before and after the update is identical excepting the first number in the createTable but identical in the insert, which seems weird but... probably not worth investigating? 
+
+ok for now, assume #1 is true, bc I don't understand scanners and it doesn't seem like it can have a problem. cool. then the problem is in parser.updateCmd (also it DOES still read the type correctly, so that's cool)
+
+parser.updateCmd() clearly does return true for matchKeyword("insert"), so it calls
+parser.insert(), which looks like it successfully eats "insert into table1 ( COL1, COL2 " fine bc the InsertData object has those. then... hopefully it eats ") values (" okay - it might not but I can't see why it wouldn't since the previous stuff was fine including keywords and delims. so the problem is gonna be in 
+parser.constList() which initializes a list and puts the first constant in it. this is where something goes wrong, probably. so it does a couple things but first it calls 
+parser.constant() (ALSO IT'S AFTER 9 DUMBASS STOP IT)... hm. when I try to print whether the constant matches an int or string, it tells me it matches neither - and also tells me "<input>:1:45: invalid char literal" which. I'm pretty sure is from the Scanner. and the 45th character of my string is ' so. that's cool. it tells me the Peek is for rune 32. which... is a FUCKING space gdi nooo why. please. stop doing this. pleeeease. okok so.... we want to get the token text and compare the first character I guess? okay the strings package has HasPrefix which will prooobaly do? not sure if it's " '" or "'" YOOOOOOOOO IT WORKED!! the constant list now looks like [{0 'Hello' false} {20  false}] which..... is an improvement? hm. the second one doesn't have the sval, which is a little concerning. so for integers... I- the makeConstInt() function should proooobably set isInt to true. maybe. whoops. okay yeah NOW that looks right. let's try and print table1 and see what happens (and then STOP FFS)
+
+
+Okay, I can't really print tables easily right now (really need a method for that in TableMgr), but I did try and print the stat info, which - I mean, it's wrong, but it didn't crash? so that's cool! and mdm does return getLayout right, so that's fine, it's just. idk man. Ooh! the stat manager even has the right stat info for the table catalog! wait actually i bet- yooooo. ok it just hadn't refreshed statistics which makes sense. now it knows there's 1 thing there! also I set statmgr to recalculate every 10 for now. 
+WELL. that was a horrid thing to do BUT I just straight up made a tableScan of table1 directly and printed it and the thing is in there correctly!!! know what that means? that means CLOSING VSCODE OKAY DASKFHSAKD
+
+todo:
+- make print table method in tablemgr / metadatamgr 
+- diagram all the stuff 
+- write the extended abstract lol
+
+ending at 9:40

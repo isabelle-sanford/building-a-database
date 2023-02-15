@@ -44,7 +44,7 @@ func makeFileMgr(dbDir string, blocksize int) FileMgr {
 	// remove any leftover temp tables
 
 	openFiles := make(map[string]int)
-	fmt.Println("openFiles during fmgr construction: ", openFiles)
+	//fmt.Println("openFiles during fmgr construction: ", openFiles)
 
 	return FileMgr{dbDir, isNew, openFiles, blocksize}
 }

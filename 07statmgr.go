@@ -39,7 +39,7 @@ func makeStatMgr(tm *TableMgr, tx *Transaction) StatMgr {
 // ! also maybe doesn't need to be pointered?
 func (sm *StatMgr) getStatInfo(tblname string, layout Layout, tx *Transaction) *StatInfo {
 	sm.numcalls++
-	if sm.numcalls > 100 {
+	if sm.numcalls > 10 { // ! temp for testing
 		sm.refreshStatistics(tx)
 	}
 

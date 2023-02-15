@@ -25,7 +25,7 @@ type Layout struct {
 // SCHEMA
 // could just do var sch Schema here
 func makeSchema() Schema {
-	return Schema{make(map[string]FieldInfo), make([]string, 1)}
+	return Schema{make(map[string]FieldInfo), make([]string, 0)}
 }
 
 func (s *Schema) addField(fldname string, fldtype int, length int) {

@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Parser struct {
 	lex Lexer
 }
@@ -18,11 +20,16 @@ func (p *Parser) field() string {
 
 func (p *Parser) constant() Constant {
 	if p.lex.matchStringConstant() {
+		//fmt.Println("identified constant as string!")
 		ret, _ := p.lex.eatStringConstant()
 		return makeConstString(ret)
-	} else {
+	} else if p.lex.matchIntConstant() {
+		//fmt.Println("identified constant as int!")
 		ret, _ := p.lex.eatIntConstant()
 		return makeConstInt(ret)
+	} else {
+		fmt.Println("could not identify constant!", p.lex.tok.TokenText()) // can I use currTok?
+		return Constant{}
 	}
 }
 

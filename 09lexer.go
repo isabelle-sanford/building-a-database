@@ -37,7 +37,9 @@ func (l *Lexer) matchIntConstant() bool {
 	return false // i guess
 }
 func (l *Lexer) matchStringConstant() bool {
-	return strconv.QuoteRune(l.tok.Peek()) == "'"
+	tt := l.tok.TokenText()
+	//fmt.Println("trying to match string constant: ", l.tok.TokenText(), "starting with", l.tok.Peek(), "check is", strings.HasPrefix(tt, "'"))
+	return strings.HasPrefix(tt, "'")
 }
 func (l *Lexer) matchKeyword(w string) bool {
 	return l.tok.TokenText() == w

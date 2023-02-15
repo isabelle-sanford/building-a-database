@@ -168,6 +168,7 @@ func (ts *TableScan) printTable() {
 	ts.beforeFirst()
 
 	fmt.Println(ts.layout.schema.fieldlist)
+	//fmt.Println("Layout:", ts.layout)
 
 	for ts.next() {
 		fmt.Println(ts.printRecord())
@@ -178,14 +179,17 @@ func (ts *TableScan) printRecord() string {
 	var s string
 	var val string
 	for _, fldname := range ts.layout.schema.fieldlist {
+
 		fld := ts.rp.layout.schema.fields[fldname]
 		if fld.fldtype == VARCHAR {
 			val, _ = ts.getString(fldname)
 		} else {
-			val = fmt.Sprint(ts.getInt(fldname))
+			temp, _ := ts.getInt(fldname)
+			val = fmt.Sprint(temp)
 		}
 
 		s += val + " "
+		//fmt.Println(i, fldname, val)
 	}
 	return s
 }
@@ -198,7 +202,8 @@ func (ts *TableScan) printSingleRecord() {
 		if fld.fldtype == VARCHAR {
 			val, _ = ts.getString(fldname)
 		} else {
-			val = fmt.Sprint(ts.getInt(fldname))
+			temp, _ := ts.getInt(fldname)
+			val = fmt.Sprint(temp)
 		}
 
 		s += val + " "
