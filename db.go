@@ -89,12 +89,42 @@ func testQuery(tblname string, tx *Transaction, db myDB, prints bool) {
 		fmt.Println("\nPLAN: \n", p)
 	}
 
-	sc := p.open()
-
 	if prints {
 		fmt.Println("SCAN (i.e. results):")
-		fmt.Println(sc)
+		printResult(p)
 	}
+}
+
+func printResult(p Plan) {
+	ret := ""
+	scn := p.open()
+	schem := p.schema()
+	scn.beforeFirst()
+
+	for scn.next() {
+		ret += stringScanRecord(*schem, scn)
+	}
+
+	fmt.Println(ret)
+
+	scn.close()
+}
+
+func stringScanRecord(sch Schema, scn Scan) string {
+	var s string
+	var val string
+	for _, fldname := range sch.fieldlist {
+		fld := sch.fields[fldname]
+		if fld.fldtype == VARCHAR {
+			val, _ = scn.getString(fldname)
+		} else {
+			temp, _ := scn.getInt(fldname)
+			val = fmt.Sprint(temp)
+		}
+
+		s += val + " "
+	}
+	return s
 }
 
 func main() {

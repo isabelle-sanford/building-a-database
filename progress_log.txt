@@ -643,4 +643,5 @@ makin a bunchhh of String() methods
 ok so seg fault fixed - it was that it was trying to access a nil pointer when you didn't use "where" in the query bc it still wanted to see the query's pred attribute. now we have a stack overflow instead! something to do with open() and the project plan (probably) - nvm, it's that projectplan was opening itself instread of the plan inside it
 
 3:30pm
-no more errors! but project isn't working 
+no more errors! but project isn't working so that's fun
+NEVERMIND IT WORKS I just didn't have something that could actually print out results. Which I now do! And now I have other work to do, so stopping for the day at 3:45. 
