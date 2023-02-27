@@ -24,6 +24,10 @@ type buffPinCount struct {
 	pinCount int
 }
 
+func (tx Transaction) String() string {
+	return fmt.Sprint("Transaction # ", tx.txnum)
+}
+
 // BUFFER LIST--------------
 func makeBufferList(bm *BufferMgr) *BufferList {
 	// idk about capacity being zero here
@@ -67,7 +71,7 @@ func (bl *BufferList) unpinAll() {
 // TRANSACTION-----------
 func getNextTxNum() int { // NOT A METHOD
 	nextTxNum++
-	fmt.Printf("new transaction: %d\n", nextTxNum)
+	//fmt.Printf("new transaction: %d\n", nextTxNum)
 	return nextTxNum
 }
 func makeTransaction(fm *FileMgr, lm *LogMgr, bm *BufferMgr) *Transaction {

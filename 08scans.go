@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // used by: TableScan, SelectScan, ProjectScan, ProductScan
 type Scan interface {
 	beforeFirst()
@@ -9,6 +11,7 @@ type Scan interface {
 	getVal(fldname string) (Constant, bool) // need to figure out equivalent of "Constant" in go
 	hasField(fldname string) bool
 	close()
+	String() string
 }
 
 // used by TableScan and SelectScan
@@ -30,6 +33,10 @@ type SelectScan struct {
 	// is this ok? just because SelectScan implements updatescan doesn't mean scn does?
 	scn  Scan // can this be not pointered without problems? interface doesn't work without it
 	pred Predicate
+}
+
+func (ss SelectScan) String() string {
+	return fmt.Sprint("select (WHERE)", ss.pred, " => \n", ss.scn)
 }
 
 func (ss *SelectScan) beforeFirst() {
@@ -102,6 +109,10 @@ type ProjectScan struct {
 	fieldlist []string // slice vs map ?
 }
 
+func (ps ProjectScan) String() string {
+	return fmt.Sprint("Projecting/filtering to (SELECT ...) columns: ", ps.fieldlist, " => \n", ps.scn)
+}
+
 func (ps *ProjectScan) beforeFirst() {
 	ps.scn.beforeFirst()
 }
@@ -155,6 +166,10 @@ func (ps *ProjectScan) close() {
 type ProductScan struct {
 	s1 Scan
 	s2 Scan
+}
+
+func (ps ProductScan) String() string {
+	return fmt.Sprint("Product/combining (FROM ...) tables: [????] => \n")
 }
 
 func (ps *ProductScan) beforeFirst() {

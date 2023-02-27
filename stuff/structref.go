@@ -2,6 +2,8 @@ package main
 
 import "go/scanner"
 
+// a "// -" before the struct indicates it has implemented the String() method
+
 type BlockId struct {
 	filename string
 	blknum   int // index of location within file
@@ -53,6 +55,7 @@ type BufferList struct {
 	bm      *BufferMgr
 }
 
+// -
 type Transaction struct {
 	txnum    int
 	bm       *BufferMgr
@@ -60,15 +63,18 @@ type Transaction struct {
 	bufflist BufferList
 }
 
+// -
 type Schema struct {
 	fields map[string]FieldInfo
 }
 
+// -
 type FieldInfo struct {
 	fldtype int
 	length  int
 }
 
+// -
 type Layout struct {
 	schema   Schema
 	offsets  map[string]int
@@ -81,6 +87,7 @@ type RecordPage struct {
 	layout Layout
 }
 
+// -
 type TableScan struct {
 	tx       *Transaction
 	tblname  string
@@ -101,6 +108,7 @@ type TableMgr struct {
 	fldcat Layout // ??
 }
 
+// -
 type StatMgr struct {
 	tm *TableMgr
 	//tx         *Transaction
@@ -108,6 +116,7 @@ type StatMgr struct {
 	numcalls   int
 }
 
+// -
 type StatInfo struct {
 	tblname   string
 	numblocks int
@@ -136,10 +145,12 @@ type Term struct {
 	lhs, rhs Expression
 }
 
+// -
 type Predicate struct {
 	terms []Term
 }
 
+// -
 type Scan interface {
 	beforeFirst()
 	next() bool
@@ -148,6 +159,7 @@ type Scan interface {
 	getVal(fldname string) (Constant, bool)
 	hasField(fldname string) bool
 	close()
+	String() string
 }
 
 // used by TableScan and SelectScan
@@ -163,21 +175,25 @@ type UpdateScan interface {
 	moveToRid(rid RID)
 }
 
+// -
 type SelectScan struct {
 	scn  Scan
 	pred Predicate
 }
 
+// -
 type ProjectScan struct {
 	scn       Scan
 	fieldlist []string
 }
 
+// -
 type ProductScan struct {
 	s1 Scan
 	s2 Scan
 }
 
+// -
 type QueryData struct {
 	fields []string
 	tables []string // collection?
@@ -231,14 +247,17 @@ type Parser struct {
 	lex Lexer
 }
 
+// -
 type Plan interface {
 	open() Scan
 	blocksAccessed() int // probs unnecessary tbh but eh
 	recordsOutput() int
 	distinctValues(fldname string) int
 	schema() *Schema
+	String() string
 }
 
+// -
 type TablePlan struct {
 	tx      *Transaction
 	tblname string
@@ -246,16 +265,19 @@ type TablePlan struct {
 	si      *StatInfo
 }
 
+// -
 type SelectPlan struct {
 	p    Plan
 	pred Predicate
 }
 
+// -
 type ProjectPlan struct {
 	p   Plan
 	sch *Schema
 }
 
+// -
 type ProductPlan struct {
 	p1, p2 Plan
 	sch    *Schema

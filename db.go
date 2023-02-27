@@ -36,33 +36,65 @@ func (db *myDB) makeTx() *Transaction {
 	return makeTransaction(db.fm, db.lm, db.bm)
 }
 
-func testInsert(tblname string, tx *Transaction, db myDB) {
-	createTableQuery := "create table table1 ( COL1 varchar (20) , COL2 int )"
-	insertQuery := "insert into table1 ( COL1 , COL2 ) values ( 'Hello' , 20 )"
-	insert2 := "insert into table1 ( COL1 , COL2 ) values ( 'World' , 10 )"
-	insert3 := "insert into table1 ( COL1 , COL2 ) values ( 'Diamond' , 15 )"
+func testCreate(tblname string, tx *Transaction, db myDB, prints bool) {
+	createTableQuery := "create table " + tblname + " ( COL1 varchar (20) , COL2 int )"
 
-	// CREATE TABLE
+	if prints {
+		fmt.Println("Executing query ", createTableQuery)
+	}
+
 	db.planner.executeUpdate(createTableQuery, tx)
-	// db.mdm.tm.showTblCatalog()
-	// db.mdm.tm.showFldCatalog()
-	//fmt.Println("table layout:", db.mdm.getLayout(tblname, tx))
+
+	if prints {
+		fmt.Println("Table created!")
+		fmt.Println(db.mdm.getLayout(tblname, tx))
+
+		fmt.Println("Catalogs - ")
+		db.mdm.tm.showTblCatalog()
+		db.mdm.tm.showFldCatalog()
+	}
+}
+
+func testInsert(tblname string, tx *Transaction, db myDB, prints bool) {
+
+	insertQuery := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'Hello' , 20 )"
+	insert2 := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'World' , 10 )"
+	insert3 := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'Diamond' , 15 )"
 
 	// INSERTIONS
 	db.planner.executeUpdate(insertQuery, tx)
-	//db.mdm.tm.printTable(tblname, tx)
-
-	//db.mdm.sm.refreshStatistics(tx)
-	//si := db.mdm.getStatInfo(tblname, db.mdm.getLayout(tblname, tx), tx)
-	//fmt.Println("\nstat info:", si)
-
-	//fmt.Println("statmgr table stats:", db.mdm.sm.tableStats)
-
 	db.planner.executeUpdate(insert2, tx)
 	db.planner.executeUpdate(insert3, tx)
 
-	fmt.Println("Created table and inserted 3 records. Table is now: ")
-	db.mdm.tm.printTable(tblname, tx)
+	if prints {
+		fmt.Println("Insertions complete! Table now looks like")
+		db.mdm.tm.printTable(tblname, tx)
+	}
+
+	db.mdm.sm.refreshStatistics(tx)
+
+	if prints {
+		fmt.Println(db.mdm.getStatInfo(tblname, db.mdm.getLayout(tblname, tx), tx))
+	}
+}
+
+func testQuery(tblname string, tx *Transaction, db myDB, prints bool) {
+	projectQuery := "select COL1 from table1 "
+
+	//selectQuery := "select COL1, COL2 from table1 where COL2 = 20"
+	p := db.planner.createQueryPlan(projectQuery, tx)
+
+	if prints {
+		fmt.Println("\nQuery complete! ")
+		fmt.Println("\nPLAN: \n", p)
+	}
+
+	sc := p.open()
+
+	if prints {
+		fmt.Println("SCAN (i.e. results):")
+		fmt.Println(sc)
+	}
 }
 
 func main() {
@@ -73,18 +105,10 @@ func main() {
 
 	tx := db.makeTx()
 
-	testInsert(tblname, tx, db)
+	testCreate(tblname, tx, db, false)
+	testInsert(tblname, tx, db, false)
 
-	// QUERIES
-	fmt.Println("Querying!")
-
-	projectQuery := "select COL1 from table1 where "
-
-	//selectQuery := "select COL1, COL2 from table1 where COL2 = 20"
-
-	db.planner.createQueryPlan(projectQuery, tx)
-
-	//fmt.Println(p)
+	testQuery(tblname, tx, db, true)
 
 	tx.commit()
 

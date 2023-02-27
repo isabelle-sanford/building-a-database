@@ -11,6 +11,7 @@ type Plan interface {
 	recordsOutput() int
 	distinctValues(fldname string) int
 	schema() *Schema
+	String() string
 }
 
 type TablePlan struct {
@@ -20,9 +21,9 @@ type TablePlan struct {
 	si      *StatInfo
 }
 
-func (tp *TablePlan) String() string {
+func (tp TablePlan) String() string {
 
-	ret := fmt.Sprintf("TablePlan for %s. \n%v\nTx %v, SI %v", tp.tblname, tp.layout, &tp.tx, &tp.si)
+	ret := fmt.Sprintf("Plan for table %s -- %v\n%v\n", tp.tblname, *tp.si, tp.layout)
 
 	return ret
 }
@@ -32,14 +33,26 @@ type SelectPlan struct {
 	pred Predicate
 }
 
+func (sp SelectPlan) String() string {
+	return fmt.Sprint("Selecting/filtering (WHERE ...) on ", sp.pred, "\n", sp.p)
+}
+
 type ProjectPlan struct {
 	p   Plan
 	sch *Schema
 }
 
+func (pp ProjectPlan) String() string {
+	return fmt.Sprint("Projecting/selecting (SELECT ...) columns ", pp.sch.fieldlist, "\n", pp.p)
+}
+
 type ProductPlan struct {
 	p1, p2 Plan
 	sch    *Schema
+}
+
+func (pp ProductPlan) String() string {
+	return fmt.Sprint("Producting/crossing (FROM ...) tables for ", pp.sch, "tables crossed are : ", pp.p1, "\n\n", pp.p2)
 }
 
 func myMin(a int, b int) int {
@@ -106,7 +119,7 @@ func makeProjectPlan(p Plan, fieldlist []string) ProjectPlan {
 }
 
 func (pp ProjectPlan) open() Scan {
-	s := pp.open()
+	s := pp.p.open()
 	return &ProjectScan{s, pp.sch.fieldlist}
 }
 func (pp ProjectPlan) blocksAccessed() int {

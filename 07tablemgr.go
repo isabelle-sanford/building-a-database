@@ -122,9 +122,7 @@ func (tm *TableMgr) showTblCatalog() {
 
 	tcat := makeTableScan(tm.tx, "tblcat", tm.tblcat)
 
-	fmt.Println("Table Catalog: ")
-	tcat.printTable()
-	fmt.Println()
+	fmt.Println("Table Catalog: \n", tcat)
 
 	tcat.close()
 }
@@ -132,9 +130,8 @@ func (tm *TableMgr) showTblCatalog() {
 func (tm *TableMgr) showFldCatalog() {
 	fcat := makeTableScan(tm.tx, "fldcat", tm.fldcat)
 
-	fmt.Println("Field Catalog: ")
-	fcat.printTable()
-	fmt.Println()
+	fmt.Println("Field Catalog: \n", fcat)
+
 	fcat.close()
 }
 
@@ -143,7 +140,7 @@ func (tm *TableMgr) printTable(tblname string, tx *Transaction) {
 
 	ts := makeTableScan(tx, tblname, l)
 
-	ts.printTable()
+	fmt.Println(ts)
 }
 
 func CatalogTest() {

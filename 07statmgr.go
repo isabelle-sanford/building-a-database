@@ -19,11 +19,34 @@ type StatMgr struct {
 	numcalls   int
 }
 
+func (sm StatMgr) String() string {
+	statTbl := fmt.Sprint("tblname	# records	# blocks")
+	totrecs := 0
+	totblocks := 0
+
+	for tblname, si := range sm.tableStats {
+		// TODO format tables better
+		statTbl += fmt.Sprintf("%s	%d	%d", tblname, si.numrecs, si.numblocks)
+		totrecs += si.numrecs
+		totblocks += si.numblocks
+	}
+
+	ret := fmt.Sprint("DATABASE STATS---\n")
+	ret += fmt.Sprintf(
+		"%d tables containing %d records in %d blocks [more here?]\n (stats last refreshed %d calls ago)\n", len(sm.tableStats), totrecs, totblocks, sm.numcalls)
+
+	return ret + statTbl
+}
+
 type StatInfo struct {
 	tblname   string
 	numblocks int
 	numrecs   int
 	distincts map[string]int
+}
+
+func (si StatInfo) String() string {
+	return fmt.Sprintf("Stats (%s): %d record(s) in %d block(s)", si.tblname, si.numrecs, si.numblocks)
 }
 
 func makeStatMgr(tm *TableMgr, tx *Transaction) StatMgr {
@@ -91,8 +114,6 @@ func calcTableStats(tblname string, layout Layout, tx *Transaction) StatInfo {
 func (si *StatInfo) getDistinct(fldname string) int {
 	return 1 + si.numrecs/3 // nope!
 }
-
-// todo tostring for stat info
 
 func StatTest() {
 	db := makeDB()

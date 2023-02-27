@@ -164,22 +164,22 @@ func (t *TableScan) atLastBlock() bool {
 	return t.tx.fm.openFiles[t.filename]-1 == t.rp.blk.blknum
 }
 
-func (ts *TableScan) printTable() {
+func (ts TableScan) String() string {
 	ts.beforeFirst()
 
-	fmt.Println(ts.layout.schema.fieldlist)
-	//fmt.Println("Layout:", ts.layout)
+	ret := fmt.Sprintf("Table %s: \n%v\n", ts.tblname, ts.layout.schema)
 
 	for ts.next() {
-		fmt.Println(ts.printRecord())
+		ret += ts.printRecord() + "\n"
 	}
+
+	return ret + "--\n"
 }
 
 func (ts *TableScan) printRecord() string {
 	var s string
 	var val string
 	for _, fldname := range ts.layout.schema.fieldlist {
-
 		fld := ts.rp.layout.schema.fields[fldname]
 		if fld.fldtype == VARCHAR {
 			val, _ = ts.getString(fldname)
@@ -189,27 +189,8 @@ func (ts *TableScan) printRecord() string {
 		}
 
 		s += val + " "
-		//fmt.Println(i, fldname, val)
 	}
 	return s
-}
-
-func (ts *TableScan) printSingleRecord() {
-	var s string
-	var val string
-	for _, fldname := range ts.layout.schema.fieldlist {
-		fld := ts.layout.schema.fields[fldname]
-		if fld.fldtype == VARCHAR {
-			val, _ = ts.getString(fldname)
-		} else {
-			temp, _ := ts.getInt(fldname)
-			val = fmt.Sprint(temp)
-		}
-
-		s += val + " "
-	}
-
-	fmt.Println(s)
 }
 
 // tableScanTest

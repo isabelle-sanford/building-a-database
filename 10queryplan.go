@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+//import "fmt"
 
 type QueryPlanner interface {
 	createPlan(data QueryData, tx *Transaction) Plan
@@ -34,7 +34,7 @@ func (pl Planner) createQueryPlan(cmd string, tx *Transaction) Plan {
 	data := parser.query()
 	// code to verify query should go here
 
-	fmt.Println("Parsed query: ", data)
+	// fmt.Println("Parsed query: ", data)
 
 	return pl.qp.createPlan(data, tx)
 }
@@ -80,8 +80,7 @@ func (bqp BasicQueryPlanner) createPlan(data QueryData, tx *Transaction) Plan {
 		plans = append(plans, makeTablePlan(tx, tblname, bqp.mdm))
 	}
 
-	fmt.Println("Plans from table list: ", plans)
-
+	// FROM
 	// product all plans together (if there's more than 1)
 	p := plans[0]
 	if len(plans) > 1 {
@@ -97,8 +96,12 @@ func (bqp BasicQueryPlanner) createPlan(data QueryData, tx *Transaction) Plan {
 		}
 	}
 
-	p = SelectPlan{p, *data.pred}
+	// WHERE
+	if data.pred != nil {
+		p = SelectPlan{p, *data.pred}
+	}
 
+	// SELECT
 	return makeProjectPlan(p, data.fields)
 }
 
