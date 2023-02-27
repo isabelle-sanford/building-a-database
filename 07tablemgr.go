@@ -138,6 +138,14 @@ func (tm *TableMgr) showFldCatalog() {
 	fcat.close()
 }
 
+func (tm *TableMgr) printTable(tblname string, tx *Transaction) {
+	l := tm.getLayout(tblname, tx)
+
+	ts := makeTableScan(tx, tblname, l)
+
+	ts.printTable()
+}
+
 func CatalogTest() {
 	db := makeDB()
 	tx := db.makeTx()

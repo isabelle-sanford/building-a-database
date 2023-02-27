@@ -623,3 +623,13 @@ todo:
 
 ending at 9:40 - nope wait i'm updating structref so I can draw diagrams, then copying it elsewhere and CLOSING VSCODE 
 ending at 9:45
+
+
+2/27/2023 11:45am
+well, let's see if queries work
+
+tests todo:
+- insert the wrong field format thingy into a table to see how it breaks
+- 
+
+should really make a toString func for tableScan instead of using printTable

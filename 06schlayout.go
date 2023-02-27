@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // imports
 
 const INTEGER = 2
@@ -20,6 +22,33 @@ type Layout struct {
 	schema   Schema
 	offsets  map[string]int
 	slotsize int
+}
+
+func (fi FieldInfo) String() string {
+	if fi.fldtype == VARCHAR {
+		return fmt.Sprint("VARCHAR(", fi.length, ")")
+	} else { // field is integer
+		return "INTEGER"
+	}
+}
+
+func (s Schema) String() string {
+	ret := "Schema: "
+	for k, v := range s.fields {
+		ret += k + " [" + v.String() + "] "
+	}
+	return ret
+}
+
+func (l Layout) String() string {
+	ret := fmt.Sprint("Layout (slot size ", l.slotsize, "): ")
+
+	for fldname, offset := range l.offsets {
+		fldinfo := l.schema.fields[fldname]
+		ret += fmt.Sprint(fldname, "{", fldinfo, "[", offset, "]} ")
+	}
+
+	return ret
 }
 
 // SCHEMA

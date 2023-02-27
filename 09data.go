@@ -19,10 +19,13 @@ func (qd QueryData) String() string {
 		result += tblname + ", "
 	}
 	// todo zap final comma
-	predstring := qd.pred.String()
-	if predstring != "" {
-		result += " where " + predstring
+	if qd.pred != nil {
+		predstring := qd.pred.String()
+		if predstring != "" {
+			result += " where " + predstring
+		}
 	}
+
 	return result
 }
 

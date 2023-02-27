@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type Plan interface {
 	open() Scan
@@ -15,6 +18,13 @@ type TablePlan struct {
 	tblname string
 	layout  Layout
 	si      *StatInfo
+}
+
+func (tp *TablePlan) String() string {
+
+	ret := fmt.Sprintf("TablePlan for %s. \n%v\nTx %v, SI %v", tp.tblname, tp.layout, &tp.tx, &tp.si)
+
+	return ret
 }
 
 type SelectPlan struct {

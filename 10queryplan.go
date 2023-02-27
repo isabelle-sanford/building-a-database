@@ -33,6 +33,9 @@ func (pl Planner) createQueryPlan(cmd string, tx *Transaction) Plan {
 	parser := makeParser(cmd)
 	data := parser.query()
 	// code to verify query should go here
+
+	fmt.Println("Parsed query: ", data)
+
 	return pl.qp.createPlan(data, tx)
 }
 func (pl Planner) executeUpdate(cmd string, tx *Transaction) int {
@@ -43,7 +46,7 @@ func (pl Planner) executeUpdate(cmd string, tx *Transaction) int {
 	obj, typ := parser.updateCmd() // HMPH
 	// code to verify update cmd goes here
 
-	fmt.Println("\nupdate is", obj, typ)
+	//fmt.Println("\nupdate is", obj, typ)
 	// fmt.Println("\nparser post-update:\n", parser.lex)
 
 	switch typ {
@@ -68,7 +71,7 @@ func (pl Planner) executeUpdate(cmd string, tx *Transaction) int {
 // QUERY PLANNER
 // not pointering is ok right?
 func (bqp BasicQueryPlanner) createPlan(data QueryData, tx *Transaction) Plan {
-	plans := make([]Plan, 1)
+	plans := make([]Plan, 0)
 	for _, tblname := range data.tables {
 		// SHOULD check whether it's a view (mdm.getViewDef(tblname, tx))
 		// and do other stuff if so
@@ -77,16 +80,20 @@ func (bqp BasicQueryPlanner) createPlan(data QueryData, tx *Transaction) Plan {
 		plans = append(plans, makeTablePlan(tx, tblname, bqp.mdm))
 	}
 
-	// product all plans together
-	p := plans[0]
-	for _, nextplan := range plans[1:] {
+	fmt.Println("Plans from table list: ", plans)
 
-		p1 := makeProductPlan(p, nextplan)
-		p2 := makeProductPlan(nextplan, p)
-		if p1.blocksAccessed() < p2.blocksAccessed() {
-			p = p1
-		} else {
-			p = p2
+	// product all plans together (if there's more than 1)
+	p := plans[0]
+	if len(plans) > 1 {
+		for _, nextplan := range plans[1:] {
+
+			p1 := makeProductPlan(p, nextplan)
+			p2 := makeProductPlan(nextplan, p)
+			if p1.blocksAccessed() < p2.blocksAccessed() {
+				p = p1
+			} else {
+				p = p2
+			}
 		}
 	}
 

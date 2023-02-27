@@ -36,37 +36,55 @@ func (db *myDB) makeTx() *Transaction {
 	return makeTransaction(db.fm, db.lm, db.bm)
 }
 
+func testInsert(tblname string, tx *Transaction, db myDB) {
+	createTableQuery := "create table table1 ( COL1 varchar (20) , COL2 int )"
+	insertQuery := "insert into table1 ( COL1 , COL2 ) values ( 'Hello' , 20 )"
+	insert2 := "insert into table1 ( COL1 , COL2 ) values ( 'World' , 10 )"
+	insert3 := "insert into table1 ( COL1 , COL2 ) values ( 'Diamond' , 15 )"
+
+	// CREATE TABLE
+	db.planner.executeUpdate(createTableQuery, tx)
+	// db.mdm.tm.showTblCatalog()
+	// db.mdm.tm.showFldCatalog()
+	//fmt.Println("table layout:", db.mdm.getLayout(tblname, tx))
+
+	// INSERTIONS
+	db.planner.executeUpdate(insertQuery, tx)
+	//db.mdm.tm.printTable(tblname, tx)
+
+	//db.mdm.sm.refreshStatistics(tx)
+	//si := db.mdm.getStatInfo(tblname, db.mdm.getLayout(tblname, tx), tx)
+	//fmt.Println("\nstat info:", si)
+
+	//fmt.Println("statmgr table stats:", db.mdm.sm.tableStats)
+
+	db.planner.executeUpdate(insert2, tx)
+	db.planner.executeUpdate(insert3, tx)
+
+	fmt.Println("Created table and inserted 3 records. Table is now: ")
+	db.mdm.tm.printTable(tblname, tx)
+}
+
 func main() {
 
 	db := makeDB()
 
-	//table1 := "table1"
-
-	createTableQuery := "create table table1 ( COL1 varchar (20) , COL2 int )"
-	insertQuery := "insert into table1 ( COL1 , COL2 ) values ( 'Hello' , 20 )"
+	tblname := "table1"
 
 	tx := db.makeTx()
 
-	db.planner.executeUpdate(createTableQuery, tx)
+	testInsert(tblname, tx, db)
 
-	// db.mdm.tm.showTblCatalog()
-	// db.mdm.tm.showFldCatalog()
+	// QUERIES
+	fmt.Println("Querying!")
 
-	fmt.Println("table1 layout:", db.mdm.getLayout("table1", tx))
+	projectQuery := "select COL1 from table1 where "
 
-	db.planner.executeUpdate(insertQuery, tx)
+	//selectQuery := "select COL1, COL2 from table1 where COL2 = 20"
 
-	// ! todo - make 'printTable(tblname)' method in table manager
-	// DEFINITELY DO NOT DO THIS WTF
-	table1 := makeTableScan(tx, "table1", db.mdm.getLayout("table1", tx))
-	table1.printTable()
+	db.planner.createQueryPlan(projectQuery, tx)
 
-	db.mdm.sm.refreshStatistics(tx)
-
-	si := db.mdm.getStatInfo("table1", db.mdm.getLayout("table1", tx), tx)
-	fmt.Println("\nstat info:", si)
-
-	fmt.Println("statmgr table stats:", db.mdm.sm.tableStats)
+	//fmt.Println(p)
 
 	tx.commit()
 
