@@ -59,7 +59,7 @@ func testInsert(tblname string, tx *Transaction, db myDB, prints bool) {
 
 	insertQuery := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'Hello' , 20 )"
 	insert2 := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'World' , 10 )"
-	insert3 := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'Diamond' , 15 )"
+	insert3 := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'Diamond' , 20 )"
 
 	// INSERTIONS
 	db.planner.executeUpdate(insertQuery, tx)
@@ -79,10 +79,10 @@ func testInsert(tblname string, tx *Transaction, db myDB, prints bool) {
 }
 
 func testQuery(tblname string, tx *Transaction, db myDB, prints bool) {
-	projectQuery := "select COL1 from table1 "
+	//projectQuery := "select COL1 from table1 "
 
-	//selectQuery := "select COL1, COL2 from table1 where COL2 = 20"
-	p := db.planner.createQueryPlan(projectQuery, tx)
+	selectQuery := "select COL1, COL2 from table1 where COL2 = 20"
+	p := db.planner.createQueryPlan(selectQuery, tx)
 
 	if prints {
 		fmt.Println("\nQuery complete! ")
@@ -102,7 +102,7 @@ func printResult(p Plan) {
 	scn.beforeFirst()
 
 	for scn.next() {
-		ret += stringScanRecord(*schem, scn)
+		ret += stringScanRecord(*schem, scn) + "\n"
 	}
 
 	fmt.Println(ret)
@@ -132,11 +132,13 @@ func main() {
 	db := makeDB()
 
 	tblname := "table1"
+	tbl2 := "tbl2"
 
 	tx := db.makeTx()
 
-	testCreate(tblname, tx, db, false)
-	testInsert(tblname, tx, db, false)
+	testCreate(tblname, tx, db, true)
+
+	testInsert(tblname, tx, db, true)
 
 	testQuery(tblname, tx, db, true)
 

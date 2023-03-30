@@ -1,12 +1,18 @@
 # Ongoing List of Questions / Concerns for later
 
+@ geoff
+
+- yeah I figured out the typecasting stuff
+- project works!! haven't tested select / product
+- need to make sure needing a 'where' is fixed (yay seg faults)
+- idk talk abt abstract / diagram?
+
 NEW ONES---
 I'm pretty sure I just can't think but - I want a function to return a value that can be of several different struct types (all ultimately labeled some kind of 'Data', like InsertData, CreateTableData, etc). The types are... not very similar (literally the only thing all of them have is 1 string). Should I make a superstruct? an interface? a list of valid types? ??
 
-Tokenizer - splitting keyword vs id better? 
+Tokenizer - splitting keyword vs id better?
 
 Conversion between UpdateScan and Scan inside of SelectScan - can I tell if a particular scan also implements updatescan and thus is useable for the updating functions? straight casting just doesn't work
-
 
 - Do I need to deal with offsets somewhere - i.e. making sure I'm storing integers/characters at the proper offset in the block so it works? I know Java handles that automatically, but what about Go?
 - When I print a list of bytes, why do integers always show up as double the amount I'm expecting? (e.g. a byte labeled 1 will print as 2)
@@ -28,10 +34,8 @@ Conversion between UpdateScan and Scan inside of SelectScan - can I tell if a pa
 - test flag to control prints and stuff / better tests
 - Choose which functions should be publicly available and capitalize them. Make sure everything _else_ is lowercase.
 - Change buffer pool get-new-unpinned-buffer thing to use `wait` and wait for an unpin rather than doing it in a timed way.
-- 
-
-
+-
 
 ## important feature notes/limitations
 
-- SQL subset does not allow: computation, sorting, grouping, nesting, renaming, * operator
+- SQL subset does not allow: computation, sorting, grouping, nesting, renaming, \* operator

@@ -26,7 +26,7 @@ func (sm StatMgr) String() string {
 
 	for tblname, si := range sm.tableStats {
 		// TODO format tables better
-		statTbl += fmt.Sprintf("%s	%d	%d", tblname, si.numrecs, si.numblocks)
+		statTbl += fmt.Sprintf("%s	%d	%d\n", tblname, si.numrecs, si.numblocks)
 		totrecs += si.numrecs
 		totblocks += si.numblocks
 	}
