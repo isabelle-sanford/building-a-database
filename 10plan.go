@@ -52,7 +52,7 @@ type ProductPlan struct {
 }
 
 func (pp ProductPlan) String() string {
-	return fmt.Sprint("Producting/crossing (FROM ...) tables for ", pp.sch, "tables crossed are : ", pp.p1, "\n\n", pp.p2)
+	return fmt.Sprint("Producting/crossing (FROM ...) tables for ", pp.sch, "\ntables crossed are : \n", pp.p1, pp.p2)
 }
 
 func myMin(a int, b int) int {
@@ -67,6 +67,7 @@ func makeTablePlan(tx *Transaction, tblname string, md MetadataMgr) TablePlan {
 
 func (tp TablePlan) open() Scan {
 	t := makeTableScan(tp.tx, tp.tblname, tp.layout)
+	fmt.Println("opening tableScan for ", tp.tblname)
 	return &t
 }
 func (tp TablePlan) blocksAccessed() int {
@@ -86,6 +87,7 @@ func (tp TablePlan) schema() *Schema {
 // don't need a constructor
 func (sp SelectPlan) open() Scan {
 	s := sp.p.open()
+	fmt.Println("opening selectScan for ", sp.pred)
 	return &SelectScan{s, sp.pred}
 }
 func (sp SelectPlan) blocksAccessed() int {
@@ -120,6 +122,7 @@ func makeProjectPlan(p Plan, fieldlist []string) ProjectPlan {
 
 func (pp ProjectPlan) open() Scan {
 	s := pp.p.open()
+	fmt.Println("opening projectPlan for cols", pp.sch.fieldlist)
 	return &ProjectScan{s, pp.sch.fieldlist}
 }
 func (pp ProjectPlan) blocksAccessed() int {
@@ -145,7 +148,9 @@ func makeProductPlan(p1, p2 Plan) ProductPlan {
 func (pop ProductPlan) open() Scan {
 	s1 := pop.p1.open()
 	s2 := pop.p2.open()
-	return &ProductScan{s1, s2}
+
+	fmt.Println("opening productPlan for ", s1, s2)
+	return makeProductScan(s1, s2)
 }
 func (pop ProductPlan) blocksAccessed() int {
 	return pop.p1.blocksAccessed() + pop.p1.recordsOutput()*pop.p2.blocksAccessed()

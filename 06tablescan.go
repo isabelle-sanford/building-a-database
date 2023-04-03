@@ -50,16 +50,14 @@ func (t TableScan) beforeFirst() {
 
 // puts currRID at next record
 func (t *TableScan) next() bool {
-	// temp var not strictly necessary
-	nextslot := t.rp.nextAfter(t.currslot)
-	for nextslot < 0 {
+	t.currslot = t.rp.nextAfter(t.currslot)
+	for t.currslot < 0 {
 		if t.atLastBlock() {
 			return false
 		}
 		t.moveToBlock(t.rp.blk.blknum + 1)
-		nextslot = t.rp.nextAfter(nextslot)
+		t.currslot = t.rp.nextAfter(t.currslot)
 	}
-	t.currslot = nextslot
 
 	return true
 }

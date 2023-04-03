@@ -168,6 +168,12 @@ type ProductScan struct {
 	s2 Scan
 }
 
+func makeProductScan(s1 Scan, s2 Scan) *ProductScan {
+	ps := ProductScan{s1, s2}
+	//ps.s1.next()
+	return &ps
+}
+
 func (ps ProductScan) String() string {
 	return fmt.Sprint("Product/combining (FROM ...) tables: [????] => \n")
 }

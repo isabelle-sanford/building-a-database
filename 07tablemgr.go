@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"os"
+)
 
 type TableMgr struct {
 	tx     *Transaction
@@ -118,29 +122,30 @@ func makeFldCat() Layout {
 	return l
 }
 
-func (tm *TableMgr) showTblCatalog() {
+func (tm *TableMgr) showTblCatalog(logger *log.Logger) {
 
 	tcat := makeTableScan(tm.tx, "tblcat", tm.tblcat)
 
-	fmt.Println("Table Catalog: \n", tcat)
+	logger.Print("Table Catalog: \n", tcat)
 
 	tcat.close()
 }
 
-func (tm *TableMgr) showFldCatalog() {
+func (tm *TableMgr) showFldCatalog(logger *log.Logger) {
 	fcat := makeTableScan(tm.tx, "fldcat", tm.fldcat)
 
-	fmt.Println("Field Catalog: \n", fcat)
+	logger.Print("Field Catalog: \n", fcat)
 
 	fcat.close()
 }
 
-func (tm *TableMgr) printTable(tblname string, tx *Transaction) {
+func (tm *TableMgr) printTable(tblname string, tx *Transaction) string {
 	l := tm.getLayout(tblname, tx)
 
 	ts := makeTableScan(tx, tblname, l)
 
-	fmt.Println(ts)
+	//fmt.Println(ts)
+	return ts.String()
 }
 
 func CatalogTest() {
@@ -156,8 +161,11 @@ func CatalogTest() {
 	fmt.Println("Creating table 'MyTable'...")
 	tm.createTable("MyTable", sch, tx)
 
-	tm.showTblCatalog()
-	tm.showFldCatalog()
+	logfile, _ := os.Create("dblogs.txt")
+	logger := log.New(logfile, "logger: ", log.Lshortfile)
+
+	tm.showTblCatalog(logger)
+	tm.showFldCatalog(logger)
 
 	fmt.Println()
 

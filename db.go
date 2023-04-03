@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"os"
+)
 
 type myDB struct {
 	fm      *FileMgr
@@ -36,26 +40,22 @@ func (db *myDB) makeTx() *Transaction {
 	return makeTransaction(db.fm, db.lm, db.bm)
 }
 
-func testCreate(tblname string, tx *Transaction, db myDB, prints bool) {
-	createTableQuery := "create table " + tblname + " ( COL1 varchar (20) , COL2 int )"
+func testCreate(tblname string, tx *Transaction, db myDB, logger *log.Logger, col1 string, col2 string) {
+	createTableQuery := fmt.Sprintf("create table %s ( %s varchar (20) , %s int )", tblname, col1, col2)
 
-	if prints {
-		fmt.Println("Executing query ", createTableQuery)
-	}
+	logger.Print("Executing query ", createTableQuery)
 
 	db.planner.executeUpdate(createTableQuery, tx)
 
-	if prints {
-		fmt.Println("Table created!")
-		fmt.Println(db.mdm.getLayout(tblname, tx))
+	logger.Print("Table created!")
+	logger.Print(db.mdm.getLayout(tblname, tx))
+	logger.Print("Catalogs - ")
+	db.mdm.tm.showTblCatalog(logger)
+	db.mdm.tm.showFldCatalog(logger)
 
-		fmt.Println("Catalogs - ")
-		db.mdm.tm.showTblCatalog()
-		db.mdm.tm.showFldCatalog()
-	}
 }
 
-func testInsert(tblname string, tx *Transaction, db myDB, prints bool) {
+func testInsert(tblname string, tx *Transaction, db myDB, logger *log.Logger) {
 
 	insertQuery := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'Hello' , 20 )"
 	insert2 := "insert into " + tblname + " ( COL1 , COL2 ) values ( 'World' , 10 )"
@@ -66,36 +66,42 @@ func testInsert(tblname string, tx *Transaction, db myDB, prints bool) {
 	db.planner.executeUpdate(insert2, tx)
 	db.planner.executeUpdate(insert3, tx)
 
-	if prints {
-		fmt.Println("Insertions complete! Table now looks like")
-		db.mdm.tm.printTable(tblname, tx)
-	}
+	logger.Print("Insertions complete! Table now looks like")
+	logger.Print(db.mdm.tm.printTable(tblname, tx))
 
 	db.mdm.sm.refreshStatistics(tx)
 
-	if prints {
-		fmt.Println(db.mdm.getStatInfo(tblname, db.mdm.getLayout(tblname, tx), tx))
-	}
+	logger.Print(db.mdm.getStatInfo(tblname, db.mdm.getLayout(tblname, tx), tx))
+
 }
 
-func testQuery(tblname string, tx *Transaction, db myDB, prints bool) {
+func doInsert(tblname string, tx *Transaction, db myDB, logger *log.Logger, val1 string, val2 int, col1 string, col2 string) {
+	insertQuery := fmt.Sprintf("insert into %s ( %s , %s ) values ( '%s' , %d )", tblname, col1, col2, val1, val2)
+
+	db.planner.executeUpdate(insertQuery, tx)
+
+	logger.Print("Insertions complete! Table now looks like")
+	logger.Print(db.mdm.tm.printTable(tblname, tx))
+
+	db.mdm.sm.refreshStatistics(tx)
+
+	logger.Print(db.mdm.getStatInfo(tblname, db.mdm.getLayout(tblname, tx), tx))
+
+}
+
+func testQuery(tblname string, tx *Transaction, db myDB, logger *log.Logger, query string) {
 	//projectQuery := "select COL1 from table1 "
+	p := db.planner.createQueryPlan(query, tx)
 
-	selectQuery := "select COL1, COL2 from table1 where COL2 = 20"
-	p := db.planner.createQueryPlan(selectQuery, tx)
+	logger.Print("\nQuery complete! ")
+	logger.Print("\nPLAN: \n", p)
 
-	if prints {
-		fmt.Println("\nQuery complete! ")
-		fmt.Println("\nPLAN: \n", p)
-	}
+	logger.Print("SCAN (i.e. results):")
+	printResult(p, logger)
 
-	if prints {
-		fmt.Println("SCAN (i.e. results):")
-		printResult(p)
-	}
 }
 
-func printResult(p Plan) {
+func printResult(p Plan, logger *log.Logger) {
 	ret := ""
 	scn := p.open()
 	schem := p.schema()
@@ -105,7 +111,7 @@ func printResult(p Plan) {
 		ret += stringScanRecord(*schem, scn) + "\n"
 	}
 
-	fmt.Println(ret)
+	logger.Print(ret)
 
 	scn.close()
 }
@@ -129,6 +135,12 @@ func stringScanRecord(sch Schema, scn Scan) string {
 
 func main() {
 
+	logfile, _ := os.Create("dblogs.txt")
+	logger := log.New(logfile, "logger: ", log.Lshortfile)
+
+	log2, _ := os.Create("output.txt")
+	logger2 := log.New(log2, " ", 0)
+
 	db := makeDB()
 
 	tblname := "table1"
@@ -136,11 +148,20 @@ func main() {
 
 	tx := db.makeTx()
 
-	testCreate(tblname, tx, db, true)
+	testCreate(tblname, tx, db, logger, "col1", "col2")
+	testCreate(tbl2, tx, db, logger, "col1", "col3")
 
-	testInsert(tblname, tx, db, true)
+	doInsert(tblname, tx, db, logger, "hello", 20, "col1", "col2")
+	doInsert(tblname, tx, db, logger, "world", 10, "col1", "col2")
+	//doInsert(tblname, tx, db, logger, "yoyo", 12, "col1", "col2")
+	//doInsert(tblname, tx, db, logger, "hello hello", 10, "col1", "col2")
+	doInsert(tbl2, tx, db, logger, "diamond", 100, "col1", "col3")
+	//doInsert(tbl2, tx, db, logger, "love", 13, "col1", "col3")
+	//doInsert(tbl2, tx, db, logger, "fdasf", 23, "col1", "col3")
+	doInsert(tbl2, tx, db, logger, "hello", 23, "col1", "col3")
 
-	testQuery(tblname, tx, db, true)
+	query := "select col1, col3  from table1 , tbl2"
+	testQuery(tblname, tx, db, logger2, query)
 
 	tx.commit()
 

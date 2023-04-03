@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 )
 
 /**
@@ -148,7 +150,9 @@ func StatTest() {
 
 	tm.createTable("Table1", sch, tx)
 
-	tm.showTblCatalog()
+	logfile, _ := os.Create("dblogs.txt")
+	logger := log.New(logfile, "logger: ", log.Lshortfile)
+	tm.showTblCatalog(logger)
 
 	fmt.Println(sm)
 
