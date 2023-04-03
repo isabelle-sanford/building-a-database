@@ -1,0 +1,17 @@
+ 
+Query complete! 
+ 
+PLAN: 
+Projecting/selecting (SELECT ...) columns [col1 col2 col3 col4]
+Selecting/filtering (WHERE ...) on {[{{{0  false} col2 false} {{20  true}  true}}]}
+Producting/crossing (FROM ...) tables for Schema: col4 [VARCHAR(20)] col3 [INTEGER] col1 [VARCHAR(20)] col2 [INTEGER] 
+tables crossed are : 
+Plan for table tbl2 -- Stats (tbl2): 4 record(s) in 1 block(s)
+Layout (slot size 44): col4{VARCHAR(20)[8]} col3{INTEGER[36]} 
+ Plan for table table1 -- Stats (table1): 4 record(s) in 1 block(s)
+Layout (slot size 44): col1{VARCHAR(20)[8]} col2{INTEGER[36]} 
+ SCAN (i.e. results):
+ 'hello' 20 100 'diamond' 
+'hello' 20 13 'love' 
+'hello' 20 23 'fdasf' 
+'hello' 20 23 'hello hello' 

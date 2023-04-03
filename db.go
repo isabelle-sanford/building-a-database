@@ -149,18 +149,18 @@ func main() {
 	tx := db.makeTx()
 
 	testCreate(tblname, tx, db, logger, "col1", "col2")
-	testCreate(tbl2, tx, db, logger, "col1", "col3")
+	testCreate(tbl2, tx, db, logger, "col4", "col3")
 
 	doInsert(tblname, tx, db, logger, "hello", 20, "col1", "col2")
 	doInsert(tblname, tx, db, logger, "world", 10, "col1", "col2")
-	//doInsert(tblname, tx, db, logger, "yoyo", 12, "col1", "col2")
-	//doInsert(tblname, tx, db, logger, "hello hello", 10, "col1", "col2")
-	doInsert(tbl2, tx, db, logger, "diamond", 100, "col1", "col3")
-	//doInsert(tbl2, tx, db, logger, "love", 13, "col1", "col3")
-	//doInsert(tbl2, tx, db, logger, "fdasf", 23, "col1", "col3")
-	doInsert(tbl2, tx, db, logger, "hello", 23, "col1", "col3")
+	doInsert(tblname, tx, db, logger, "yoyo", 12, "col1", "col2")
+	doInsert(tblname, tx, db, logger, "hello", 10, "col1", "col2")
+	doInsert(tbl2, tx, db, logger, "diamond", 100, "col4", "col3")
+	doInsert(tbl2, tx, db, logger, "love", 13, "col4", "col3")
+	doInsert(tbl2, tx, db, logger, "fdasf", 23, "col4", "col3")
+	doInsert(tbl2, tx, db, logger, "hello hello", 23, "col4", "col3")
 
-	query := "select col1, col3  from table1 , tbl2"
+	query := "select col1, col2, col3, col4  from table1, tbl2 where col2 = 20"
 	testQuery(tblname, tx, db, logger2, query)
 
 	tx.commit()

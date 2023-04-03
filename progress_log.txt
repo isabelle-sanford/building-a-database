@@ -645,3 +645,17 @@ ok so seg fault fixed - it was that it was trying to access a nil pointer when y
 3:30pm
 no more errors! but project isn't working so that's fun
 NEVERMIND IT WORKS I just didn't have something that could actually print out results. Which I now do! And now I have other work to do, so stopping for the day at 3:45. 
+
+
+3/27/23 1:20pm
+so last I recall, product doesn't work
+aaand i proceeded to do nothing 
+
+4/3/23 4:15pm
+so let's get product working shall we
+ok so actually starting to figure out the log package now
+todo: make the tableScan print the column names above the values 
+....that was incredibly frustrating and it was a small change to TableScan because at that point I wasn't exacting about making sure my code copied the book's. sigh. that was so annoying. 
+soo... now what? wait
+so I think that the "where" clause might have to pull from something in the first table? though that doesn't make sense does it - no nevermind, just that uppercase keywords don't work 
+todo: make uppercase work for SELECT, FROM, etc 

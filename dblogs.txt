@@ -1,0 +1,111 @@
+logger: db.go:46: Executing query create table table1 ( col1 varchar (20) , col2 int )
+logger: db.go:50: Table created!
+logger: db.go:51: Layout (slot size 44): col1{VARCHAR(20)[8]} col2{INTEGER[36]} 
+logger: db.go:52: Catalogs - 
+logger: 07tablemgr.go:129: Table Catalog: 
+Table tblcat: 
+Schema: tblname [VARCHAR(20)] slotsize [INTEGER] 
+tblcat 44 
+fldcat 88 
+table1 16 
+--
+logger: 07tablemgr.go:137: Field Catalog: 
+Table fldcat: 
+Schema: fldname [VARCHAR(20)] fldtype [INTEGER] length [INTEGER] offset [INTEGER] tblname [VARCHAR(20)] 
+tblcat tblname 3 20 8 
+tblcat slotsize 2 0 36 
+fldcat fldname 3 20 36 
+fldcat fldtype 2 0 64 
+fldcat length 2 0 72 
+fldcat offset 2 0 80 
+fldcat tblname 3 20 8 
+table1 col1 3 20 0 
+table1 col2 2 0 8 
+--
+logger: db.go:46: Executing query create table tbl2 ( col4 varchar (20) , col3 int )
+logger: db.go:50: Table created!
+logger: db.go:51: Layout (slot size 44): col4{VARCHAR(20)[8]} col3{INTEGER[36]} 
+logger: db.go:52: Catalogs - 
+logger: 07tablemgr.go:129: Table Catalog: 
+Table tblcat: 
+Schema: tblname [VARCHAR(20)] slotsize [INTEGER] 
+tblcat 44 
+fldcat 88 
+table1 16 
+tbl2 16 
+--
+logger: 07tablemgr.go:137: Field Catalog: 
+Table fldcat: 
+Schema: offset [INTEGER] tblname [VARCHAR(20)] fldname [VARCHAR(20)] fldtype [INTEGER] length [INTEGER] 
+tblcat tblname 3 20 8 
+tblcat slotsize 2 0 36 
+fldcat fldname 3 20 36 
+fldcat fldtype 2 0 64 
+fldcat length 2 0 72 
+fldcat offset 2 0 80 
+fldcat tblname 3 20 8 
+table1 col1 3 20 0 
+table1 col2 2 0 8 
+tbl2 col4 3 20 0 
+tbl2 col3 2 0 8 
+--
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table table1: 
+Schema: col1 [VARCHAR(20)] col2 [INTEGER] 
+'hello' 20 
+--
+logger: db.go:88: Stats (table1): 1 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table table1: 
+Schema: col1 [VARCHAR(20)] col2 [INTEGER] 
+'hello' 20 
+'world' 10 
+--
+logger: db.go:88: Stats (table1): 2 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table table1: 
+Schema: col2 [INTEGER] col1 [VARCHAR(20)] 
+'hello' 20 
+'world' 10 
+'yoyo' 12 
+--
+logger: db.go:88: Stats (table1): 3 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table table1: 
+Schema: col1 [VARCHAR(20)] col2 [INTEGER] 
+'hello' 20 
+'world' 10 
+'yoyo' 12 
+'hello' 10 
+--
+logger: db.go:88: Stats (table1): 4 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table tbl2: 
+Schema: col4 [VARCHAR(20)] col3 [INTEGER] 
+'diamond' 100 
+--
+logger: db.go:88: Stats (tbl2): 1 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table tbl2: 
+Schema: col4 [VARCHAR(20)] col3 [INTEGER] 
+'diamond' 100 
+'love' 13 
+--
+logger: db.go:88: Stats (tbl2): 2 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table tbl2: 
+Schema: col4 [VARCHAR(20)] col3 [INTEGER] 
+'diamond' 100 
+'love' 13 
+'fdasf' 23 
+--
+logger: db.go:88: Stats (tbl2): 3 record(s) in 1 block(s)
+logger: db.go:83: Insertions complete! Table now looks like
+logger: db.go:84: Table tbl2: 
+Schema: col4 [VARCHAR(20)] col3 [INTEGER] 
+'diamond' 100 
+'love' 13 
+'fdasf' 23 
+'hello hello' 23 
+--
+logger: db.go:88: Stats (tbl2): 4 record(s) in 1 block(s)
