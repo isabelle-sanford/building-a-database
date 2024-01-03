@@ -4,7 +4,7 @@ This repository contains the internals of a very simple database engine, written
 
 This is my senior capstone project as a Computer Science major at Bryn Mawr College. I'm building this database in order to understand how the inside of a database work, from reading and writing to disk all the way to parsing SQL queries and optimizing how to get the answer. I do a lot of work with data analysis and visualization, so I wanted to do something closer to the computer fundamentals/core (?? wrong word) that helps me more generally.
 
-If you know anyone who would be interested in hiring a newly-graduated CS student who does data or visual stuff, I would love it if you sent them [(https://drive.google.com/file/d/1spyOKMx9la_qlv9Gs76IGHj2i2iiNwhj/view?usp=drive_link)]my resume!
+If you know anyone who would be interested in hiring a newly-graduated CS student who does data or visual stuff, I would love it if you sent them [my resume](https://drive.google.com/file/d/1spyOKMx9la_qlv9Gs76IGHj2i2iiNwhj/view?usp=drive_link)!
 
 ## Progress
 
