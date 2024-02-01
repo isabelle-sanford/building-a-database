@@ -8,7 +8,7 @@ If you know anyone who would be interested in hiring a newly-graduated CS studen
 
 ## Status
 
-Current functionalities (the numbers indicate the corresponding chapter of the textbook I'm using, for my own convenience):
+These are the current features of the database engine. The numbers refer to the corresponding chapter in the textbook I'm using as a basis (_Database Design and Implementation_, by Edward Sciore). The same numbers are also prefixed to names of files containing the code for the corresponding feature. This means that the order of the files is in rising complexity, and later files generally build on the objects of earlier ones.
 
 - [3] Files are divided up into blocks of a size matching what the CPU uses when writing/reading from the disk. These blocks can read and write integers, strings, and generic byte objects (blobs). Blocks are accessed independently of each other, so reading or writing one block does not require reading or writing the rest of the file.
 - [3,4] To minimize disk reads and writes, currently-in-use blocks are stored in _pages_ held in a _buffer pool_, which holds pages in use but also, if there is any room left over, keeps recently-used blocks around (i.e. caches them) and does not write to the disk until required.
